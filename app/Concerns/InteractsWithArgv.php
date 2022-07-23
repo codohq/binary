@@ -1,6 +1,6 @@
 <?php
 
-namespace Codo\Binary\Concerns;
+namespace Codohq\Binary\Concerns;
 
 use Symfony\Component\Process\Process;
 
@@ -41,7 +41,7 @@ trait InteractsWithArgv
         return $this->error($buffer);
       }
 
-      $this->processOutput($buffer);
+      $this->info($buffer);
     });
 
     return $process->getExitCode();
@@ -56,6 +56,30 @@ trait InteractsWithArgv
    * @return array
    */
   public function process(string $command, array $arguments = [], ?string $workdir = null): array
+  {
+    list ($data, $environment, $full) = $this->prepareProcess($command, $arguments);
+
+    $this->command(implode(' ', $full));
+
+    $process = new Process($data, $workdir, $environment);
+
+    $process->run();
+
+    return [
+      $process->getExitCode(),
+      $process->getOutput() ?: $process->getErrorOutput(),
+    ];
+  }
+
+  /**
+   * Execute the given command and return its status code & output.
+   *
+   * @param  string  $command
+   * @param  array  $arguments  []
+   * @param  string|null  $workdir  null
+   * @return array
+   */
+  public function silentProcess(string $command, array $arguments = [], ?string $workdir = null): array
   {
     list ($data, $environment) = $this->prepareProcess($command, $arguments);
 
@@ -85,10 +109,10 @@ trait InteractsWithArgv
         'CODO_UID'        => trim(shell_exec('id -u')),
         'CODO_GID'        => trim(shell_exec('id -g')),
         'CODO_BASEPATH'   => realpath($directory),
-        'CODO_DOCKER'     => $codo['config']['codo']['components']['docker'],
-        'CODO_ENTRYPOINT' => $codo['config']['codo']['components']['entrypoint'],
-        'CODO_FRAMEWORK'  => $codo['config']['codo']['components']['framework'],
-        'CODO_THEME'      => $codo['config']['codo']['components']['theme'],
+        'CODO_DOCKER'     => $codo['config']->get('codo.components.docker'),
+        'CODO_ENTRYPOINT' => $codo['config']->get('codo.components.entrypoint'),
+        'CODO_FRAMEWORK'  => $codo['config']->get('codo.components.framework'),
+        'CODO_THEME'      => $codo['config']->get('codo.components.theme'),
       ];
 
       $combined = array_map(
@@ -96,13 +120,9 @@ trait InteractsWithArgv
         array_values($environment),
         array_keys($environment)
       );
-
-      $this->info(
-        implode(' ', array_merge($combined, $data))
-      );
     }
 
-    return [$data, $environment ?? null];
+    return [$data, $environment ?? null, array_merge($combined ?? [], $data)];
   }
 
   /**

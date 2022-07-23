@@ -1,9 +1,9 @@
 <?php
 
-namespace Codo\Binary\Commands\External;
+namespace Codohq\Binary\Commands\External;
 
 use function Termwind\{ render };
-use Codo\Binary\Commands\CodoCommand;
+use Codohq\Binary\Commands\CodoCommand;
 
 class NpmCommand extends CodoCommand
 {
@@ -40,32 +40,28 @@ class NpmCommand extends CodoCommand
    */
   public function handle()
   {
-    $codo = app('codo');
-
-    if (empty($codo['file'])) {
-      return 1;
+    if ($this->isIneligible()) {
+      return $this->ineligible();
     }
+
+    $codo = app('codo');
 
     $package = $this->locatePackageJsonFile(getcwd());
 
-    var_dump([getcwd(), $package]);
-    exit;
-
-    $workdir = $this->option('workdir') ?? realpath(dirname($codo['file']).'/'.$codo['config']['codo']['components']['theme']);
+    $workdir = $this->option('workdir')
+      ?? ($package ? dirname($package) : $codo['config']->getTheme(null, true));
 
     list ($status, $output) = $this->runningProcess('npm', $this->getArgv(), $workdir);
 
-    if ($status !== 0) {
-      $this->error($output);
+    if (! empty($output)) {
+      if (! empty($status)) {
+        $this->error($output);
 
-      return $status;
+        return $status;
+      }
+
+      $this->info($output);
     }
-
-    render(<<<HTML
-      <div>
-        <pre class="w-full px-1">{$output}</pre>
-      </div>
-    HTML);
 
     return 0;
   }

@@ -1,8 +1,10 @@
 <?php
 
-namespace Codo\Binary\Providers;
+namespace Codohq\Binary\Providers;
 
+use Phar;
 use Illuminate\Support\ServiceProvider;
+use Codohq\Binary\Parsers\YamlConfigParser;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -14,12 +16,18 @@ class AppServiceProvider extends ServiceProvider
   public function boot()
   {
     app()->bind('codo', function ($app) {
-      $config = $this->locateCodoConfigurationFile(getcwd());
+      $filepath = $this->locateCodoConfigurationFile(getcwd());
+
+      $config = is_file($filepath) ? (new YamlConfigParser)->parse($filepath) : null;
+
+      if (! is_null($config)) {
+        config(['logging.channels.single.path' => $config->getWorkingDirectory('codo.log')]);
+      }
 
       return [
         'version' => config('app.version'),
-        'file'    => $config,
-        'config'  => is_file($config) ? yaml_parse_file($config) : null,
+        'file'    => $filepath,
+        'config'  => $config,
       ];
     });
   }

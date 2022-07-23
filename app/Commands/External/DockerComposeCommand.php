@@ -1,9 +1,10 @@
 <?php
 
-namespace Codo\Binary\Commands\External;
+namespace Codohq\Binary\Commands\External;
 
+use Illuminate\Support\Arr;
 use function Termwind\{ render };
-use Codo\Binary\Commands\CodoCommand;
+use Codohq\Binary\Commands\CodoCommand;
 
 class DockerComposeCommand extends CodoCommand
 {
@@ -40,23 +41,30 @@ class DockerComposeCommand extends CodoCommand
    */
   public function handle()
   {
-    $codo = app('codo');
-
-    if (empty($codo['file'])) {
-      return 1;
+    if ($this->isIneligible()) {
+      return $this->ineligible();
     }
 
-    $composeFile = sprintf('%s/docker/docker-compose.yml', dirname($codo['file']));
-    $envComposeFile = sprintf('%s/docker/docker-compose.%s.yml', dirname($codo['file']), $codo['config']['settings']['environment']);
-    $envFile = sprintf('%s/.env', realpath(dirname($codo['file']).'/'.$codo['config']['codo']['components']['entrypoint']));
+    $codo = app('codo');
 
-    list ($status, $output) = $this->process('docker compose', [
-      '--project-name', $codo['config']['settings']['name'],
-      '-f', $composeFile,
-      '-f', $envComposeFile,
-      '--env-file', $envFile,
+    $composeFiles = Arr::collapse(array_map(fn ($x) => ['-f', $x], array_filter([
+      $codo['config']->getDocker('docker-compose.yml', false),
+      $codo['config']->getDocker(sprintf('docker-compose.%s.yml', $codo['config']->getEnvironment()), false),
+    ])));
+
+    $arguments = [
+      '--project-name',
+      $codo['config']->getProject(),
+
+      '--env-file',
+      $codo['config']->getEntrypoint('.env', true),
+
+      ...$composeFiles,
+
       ...$this->getArgv(),
-    ]);
+    ];
+
+    list ($status, $output) = $this->process('docker compose', $arguments);
 
     if ($status !== 0) {
       $this->error($output);
@@ -64,7 +72,7 @@ class DockerComposeCommand extends CodoCommand
       return $status;
     }
 
-    $this->processOutput($output);
+    $this->info($output);
 
     return 0;
   }

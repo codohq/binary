@@ -54,7 +54,7 @@ return [
   */
 
   'providers' => [
-    Codo\Binary\Providers\AppServiceProvider::class,
+    Codohq\Binary\Providers\AppServiceProvider::class,
   ],
 
 ];

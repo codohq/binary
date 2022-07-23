@@ -1,9 +1,9 @@
 <?php
 
-namespace Codo\Binary\Commands\Codo;
+namespace Codohq\Binary\Commands\Codo;
 
-use Codo\Binary\Commands;
-use Codo\Binary\Commands\CodoCommand;
+use Codohq\Binary\Commands;
+use Codohq\Binary\Commands\CodoCommand;
 
 class UpCommand extends CodoCommand
 {
@@ -19,7 +19,7 @@ class UpCommand extends CodoCommand
    *
    * @var string
    */
-  protected $description = 'Boot the Docker services.';
+  protected $description = 'Boot the Codo project.';
 
   /**
    * Create a new command instance.
@@ -40,6 +40,10 @@ class UpCommand extends CodoCommand
    */
   public function handle()
   {
+    if ($this->isIneligible()) {
+      return $this->ineligible();
+    }
+
     return $this->callWithArgv(Commands\External\DockerComposeCommand::class, [
       'up',
       '--force-recreate',
