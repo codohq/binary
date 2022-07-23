@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Commands\External;
+namespace Codo\Binary\Commands\External;
 
-use App\Commands\CodoCommand;
 use function Termwind\{ render };
+use Codo\Binary\Commands\CodoCommand;
 
 class DockerComposeCommand extends CodoCommand
 {

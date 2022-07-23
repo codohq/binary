@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Commands\Codo;
+namespace Codo\Binary\Commands\Codo;
 
-use App\Commands;
-use App\Commands\CodoCommand;
+use Codo\Binary\Commands;
 use function Termwind\{ render };
+use Codo\Binary\Commands\CodoCommand;
 
 class InfoCommand extends CodoCommand
 {
@@ -31,25 +31,55 @@ class InfoCommand extends CodoCommand
   {
     $codo = app('codo');
 
+    $docker = $this->dockerVersion();
+    $dockerCompose = $this->dockerComposeVersion();
+    $workdir = dirname($codo['file']);
+
     render(<<<HTML
-      <div>
-        {$this->codo($codo)}
-
-        {$this->dockerVersion()}
-
-        {$this->dockerComposeVersion()}
-
-        {$this->projectConfiguration($codo['config'], $codo['file'])}
+      <div class="mx-2 my-1">
+        <div class="space-x-1">
+          <span class="px-1 bg-black font-bold text-white uppercase">Codo</span>
+          <span>{$codo['version']}</span>
+        </div>
+        <div class="mt-1">
+          <div class="flex space-x-1">
+            <span class="font-bold">Docker</span>
+            <span class="flex-1 content-repeat-[.] text-gray"></span>
+            <span class="font-bold text-green uppercase">{$docker}</span>
+          </div>
+          <div class="flex space-x-1">
+            <span class="font-bold">Docker Compose</span>
+            <span class="flex-1 content-repeat-[.] text-gray"></span>
+            <span class="font-bold text-green uppercase">{$dockerCompose}</span>
+          </div>
+          <div class="flex space-x-1">
+            <span class="font-bold">Working Directory</span>
+            <span class="flex-1 content-repeat-[.] text-gray"></span>
+            <span class="font-bold text-green uppercase">{$workdir}</span>
+          </div>
+        </div>
       </div>
     HTML);
 
-    if (empty($codo['file'])) {
-      render(<<<HTML
-        <div class="mb-1 bg-orange-300 text-black px-1 flex justify-center">
-          No project found in this directory.
-        </div>
-      HTML);
-    }
+    // render(<<<HTML
+    //   <div>
+    //     {$this->codo($codo)}
+
+    //     {$this->dockerVersion()}
+
+    //     {$this->dockerComposeVersion()}
+
+    //     {$this->projectConfiguration($codo['config'], $codo['file'])}
+    //   </div>
+    // HTML);
+
+    // if (empty($codo['file'])) {
+    //   render(<<<HTML
+    //     <div class="mb-1 bg-orange-300 text-black px-1 flex justify-center">
+    //       No project found in this directory.
+    //     </div>
+    //   HTML);
+    // }
 
     return 0;
   }
@@ -86,53 +116,55 @@ class InfoCommand extends CodoCommand
   /**
    * Retrieve the version of the installed Docker binary.
    *
-   * @return void
+   * @return string|null
    */
-  protected function dockerVersion(): void
+  protected function dockerVersion(): ?string
   {
     list ($status, $output) = $this->process('docker --version');
 
     if ($status !== 0) {
-      $this->error($output);
-      return;
+      return $this->error($output);
     }
 
     preg_match('/(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?/', $output, $matches);
 
     $version = $matches[0] ?? 'Unknown';
 
-    render(<<<HTML
-      <div class="flex justify-between bg-gray-100">
-        <span class="px-1">Docker</span>
-        <span class="px-1 bg-green-300 text-black">v{$version}</span>
-      </div>
-    HTML);
+    // render(<<<HTML
+    //   <div class="flex justify-between bg-gray-100">
+    //     <span class="px-1">Docker</span>
+    //     <span class="px-1 bg-green-300 text-black">v{$version}</span>
+    //   </div>
+    // HTML);
+
+    return $version;
   }
 
   /**
    * Retrieve the version of the installed Docker Compose binary.
    *
-   * @return void
+   * @return string|null
    */
-  protected function dockerComposeVersion(): void
+  protected function dockerComposeVersion(): ?string
   {
     list ($status, $output) = $this->process('docker compose version');
 
     if ($status !== 0) {
-      $this->error($output);
-      return;
+      return $this->error($output);
     }
 
     preg_match('/(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?/', $output, $matches);
 
     $version = $matches[0] ?? 'Unknown';
 
-    render(<<<HTML
-      <div class="flex justify-between">
-        <span class="px-1">Docker Compose</span>
-        <span class="px-1 bg-green-400 text-black">v{$version}</span>
-      </div>
-    HTML);
+    // render(<<<HTML
+    //   <div class="flex justify-between">
+    //     <span class="px-1">Docker Compose</span>
+    //     <span class="px-1 bg-green-400 text-black">v{$version}</span>
+    //   </div>
+    // HTML);
+
+    return $version;
   }
 
   /**

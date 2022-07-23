@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Commands\External;
+namespace Codo\Binary\Commands\External;
 
-use App\Commands\CodoCommand;
 use function Termwind\{ render };
+use Codo\Binary\Commands\CodoCommand;
 
 class NpmCommand extends CodoCommand
 {
@@ -12,7 +12,7 @@ class NpmCommand extends CodoCommand
    *
    * @var string
    */
-  protected $signature = 'npm';
+  protected $signature = 'npm {--w|workdir=}';
 
   /**
    * The description of the command.
@@ -46,7 +46,12 @@ class NpmCommand extends CodoCommand
       return 1;
     }
 
-    $workdir = realpath(dirname($codo['file']).'/'.$codo['config']['codo']['components']['theme']);
+    $package = $this->locatePackageJsonFile(getcwd());
+
+    var_dump([getcwd(), $package]);
+    exit;
+
+    $workdir = $this->option('workdir') ?? realpath(dirname($codo['file']).'/'.$codo['config']['codo']['components']['theme']);
 
     list ($status, $output) = $this->runningProcess('npm', $this->getArgv(), $workdir);
 
@@ -63,5 +68,28 @@ class NpmCommand extends CodoCommand
     HTML);
 
     return 0;
+  }
+
+  /**
+   * Retrieve the absolute path to the closest package.json file.
+   *
+   * @param  string  $directory
+   * @return string|null
+   */
+  protected function locatePackageJsonFile(string $directory): ?string
+  {
+    $expected = sprintf('%s/package.json', $directory);
+
+    $parent = dirname($directory);
+
+    if (in_array($parent, ['/', '\\', '.'])) {
+      return null;
+    }
+
+    if (! is_file($expected)) {
+      return $this->locatePackageJsonFile($parent);
+    }
+
+    return $expected;
   }
 }

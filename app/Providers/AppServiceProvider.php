@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Providers;
+namespace Codo\Binary\Providers;
 
 use Illuminate\Support\ServiceProvider;
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Concerns;
+namespace Codo\Binary\Concerns;
 
 use Symfony\Component\Process\Process;
 

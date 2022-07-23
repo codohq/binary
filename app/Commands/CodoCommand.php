@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Commands;
+namespace Codo\Binary\Commands;
 
-use App\Concerns;
+use Codo\Binary\Concerns;
 use Illuminate\Console\Scheduling\Schedule;
 use LaravelZero\Framework\Commands\Command as Base;
 

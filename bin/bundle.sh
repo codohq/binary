@@ -16,7 +16,7 @@ case "$KERNEL" in
     ;;
 esac
 
-rm -rf $APP/builds/ $SRC/codo-$ARCH
+rm -rf $APP/builds/
 
 docker run --rm -it \
   -u $(id -u):$(id -g) \
@@ -34,8 +34,8 @@ if [ ! -f "$APP/builds/codo" ]; then
   exit 1
 fi
 
-cat $SRC/$PHPVER/micro-$ARCH.sfx $APP/builds/codo > $SRC/codo-$ARCH
+cat $SRC/$PHPVER/micro-$ARCH.sfx $APP/builds/codo > $APP/builds/codo-$ARCH
 
-chmod +x $SRC/codo-$ARCH
+chmod +x $APP/builds/codo-$ARCH
 
 exit 0

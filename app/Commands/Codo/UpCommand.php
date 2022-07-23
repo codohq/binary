@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Commands\Codo;
+namespace Codo\Binary\Commands\Codo;
 
-use App\Commands;
-use App\Commands\CodoCommand;
+use Codo\Binary\Commands;
+use Codo\Binary\Commands\CodoCommand;
 
 class UpCommand extends CodoCommand
 {
