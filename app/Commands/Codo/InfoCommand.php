@@ -88,6 +88,7 @@ class InfoCommand extends CodoCommand
           'Entrypoint'      => $config->getEntrypoint(),
           'Framework'       => $config->getFramework(),
           'Theme'           => $config->getTheme(),
+          'Commands'        => [null, $config->getCommandDirectories(false)],
         ]],
       ]],
     ]);
@@ -116,12 +117,14 @@ class InfoCommand extends CodoCommand
         <span class="font-bold text-blue">{$value}</span>
       HTML;
 
-      $content .= <<<HTML
-        <div class="flex space-x-1 {$classes}">
-          <span class="font-bold">{$prefix}{$field}</span>
-          {$html}
-        </div>
-      HTML;
+      if (is_null($children) or ! empty($children)) {
+        $content .= <<<HTML
+          <div class="flex space-x-1 {$classes}">
+            <span class="font-bold">{$prefix}{$field}</span>
+            {$html}
+          </div>
+        HTML;
+      }
 
       if (! empty($children)) {
         $depth++;

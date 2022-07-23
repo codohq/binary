@@ -2,10 +2,17 @@
 
 namespace Codohq\Binary;
 
-use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 
 class Configuration
 {
+  /**
+   * Holds the configuration data.
+   *
+   * @var \Illuminate\Support\Collection
+   */
+  protected Collection $data;
+
   /**
    * Instantiate a new Codo configuration object.
    *
@@ -13,9 +20,9 @@ class Configuration
    * @param  string  $workdir
    * @return void
    */
-  public function __construct(protected array $data, protected string $workdir)
+  public function __construct(array $data, protected string $workdir)
   {
-    //
+    $this->data = (new Collection($data))->recursive();
   }
 
   /**
@@ -120,7 +127,25 @@ class Configuration
   }
 
   /**
-   * Retrieve a specific item from the configuration using dot notations.
+   * Retrieve the command directories.
+   *
+   * @param  boolean  $absolute  true
+   * @return array
+   */
+  public function getCommandDirectories(bool $absolute = true): array
+  {
+    $paths = $this->get('codo.commands', new Collection)
+      ->map(function ($path) use ($absolute) {
+        return ($absolute and str_starts_with($path, '.'))
+          ? $this->getWorkingDirectory($path, true)
+          : $path;
+      });
+
+    return $paths->toArray();
+  }
+
+  /**
+   * Retrieve a specific item from the configuration.
    *
    * @param  string  $path
    * @param  mixed  $fallback  null
@@ -128,9 +153,7 @@ class Configuration
    */
   public function get(string $path, mixed $fallback = null): mixed
   {
-    $list = Arr::dot($this->data);
-
-    return $list[$path] ?? $fallback;
+    return $this->data->path($path, $fallback);
   }
 
   /**
