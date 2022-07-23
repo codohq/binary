@@ -31,6 +31,17 @@ class AppServiceProvider extends ServiceProvider
    */
   public function register()
   {
+    $this->registerHelpers();
+    $this->initialiseCodo();
+  }
+
+  /**
+   * Register helper functions.
+   *
+   * @return void
+   */
+  protected function registerHelpers(): void
+  {
     Collection::macro('path', function ($key, $default = null) {
       return Arr::get($this->items, $key, $default);
     });
@@ -44,12 +55,12 @@ class AppServiceProvider extends ServiceProvider
         return $value;
       });
     });
-
-    $this->initialiseCodo();
   }
 
   /**
+   * Initialise the Codo binary.
    *
+   * @return void
    */
   protected function initialiseCodo(): void
   {
