@@ -23,28 +23,6 @@ abstract class Command extends Base
   }
 
   /**
-   * Check if the current working directory is eligible or not.
-   *
-   * @return boolean
-   */
-  public function isEligible(): bool
-  {
-    $codo = app('codo');
-
-    return ! empty($codo['file']) and ! empty($codo['config']);
-  }
-
-  /**
-   * Check if the current working directory is ineligible or not.
-   *
-   * @return boolean
-   */
-  public function isIneligible(): bool
-  {
-    return ! $this->isEligible();
-  }
-
-  /**
    * Retrieve the absolute path to the closest package.json file.
    *
    * @param  string  $file

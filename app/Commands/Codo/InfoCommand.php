@@ -69,14 +69,12 @@ class InfoCommand extends Command
    * Render a list of the project configuration
    *
    * @param  \Codohq\Binary\Configuration|null  $config
-   * @return string
+   * @return string|null
    */
-  protected function projectConfiguration(?Configuration $config): string
+  protected function projectConfiguration(?Configuration $config): ?string
   {
-    if (is_null($config)) {
-      $this->warn('No codo.yml file was found.');
-
-      return '';
+    if ($this->isIneligible()) {
+      return $this->ineligible();
     }
 
     $items = (new GroupedList)
