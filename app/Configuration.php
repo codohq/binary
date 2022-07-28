@@ -26,6 +26,28 @@ class Configuration
   }
 
   /**
+   * Retrieve the global Codo environment variables.
+   *
+   * @return array
+   */
+  public function getEnvironmentVariables(): array
+  {
+    return [
+      'CODO_UID'              => trim(shell_exec('id -u')),
+      'CODO_GID'              => trim(shell_exec('id -g')),
+      'CODO_BASEPATH'         => realpath($this->workdir),
+      'CODO_DOCKER'           => $this->getDocker(),
+      'CODO_DOCKER_FULL'      => $this->getDocker(null, true),
+      'CODO_ENTRYPOINT'       => $this->getEntrypoint(),
+      'CODO_ENTRYPOINT_FULL'  => $this->getEntrypoint(null, true),
+      'CODO_FRAMEWORK'        => $this->getFramework(),
+      'CODO_FRAMEWORK_FULL'   => $this->getFramework(null, true),
+      'CODO_THEME'            => $this->getTheme(),
+      'CODO_THEME_FULL'       => $this->getTheme(null, true),
+    ];
+  }
+
+  /**
    * Retrieve the project domain.
    *
    * @return string|null

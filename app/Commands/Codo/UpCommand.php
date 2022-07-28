@@ -3,9 +3,9 @@
 namespace Codohq\Binary\Commands\Codo;
 
 use Codohq\Binary\Commands;
-use Codohq\Binary\Commands\CodoCommand;
+use Codohq\Binary\Commands\Command;
 
-class UpCommand extends CodoCommand
+class UpCommand extends Command
 {
   /**
    * The signature of the command.

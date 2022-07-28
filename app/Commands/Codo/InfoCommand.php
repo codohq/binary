@@ -2,13 +2,13 @@
 
 namespace Codohq\Binary\Commands\Codo;
 
-use Codohq\Binary\Commands;
 use Illuminate\Support\Arr;
-use Codohq\Binary\Configuration;
 use function Termwind\{ render };
-use Codohq\Binary\Commands\CodoCommand;
+use Codohq\Binary\Commands\Command;
+use Codohq\Binary\Components\ListOfItems;
+use Codohq\Binary\{ Commands, Configuration };
 
-class InfoCommand extends CodoCommand
+class InfoCommand extends Command
 {
   /**
    * The signature of the command.
@@ -56,12 +56,13 @@ class InfoCommand extends CodoCommand
    */
   protected function prerequisites(): string
   {
-    return $this->renderItems([
-      'Prerequisites'   => [null, [
-        'Docker'          => $this->dockerVersion(),
-        'Docker Compose'  => $this->dockerComposeVersion(),
-      ]],
-    ]);
+    $items = (new ListOfItems)
+      ->addGroup('Prerequisites', function ($group) {
+        $group->addItem('Docker', $this->dockerVersion());
+        $group->addItem('Docker Compose', $this->dockerComposeVersion());
+      });
+
+    return $this->renderItems($items, 0, 'green');
   }
 
   /**
@@ -78,58 +79,76 @@ class InfoCommand extends CodoCommand
       return '';
     }
 
-    return $this->renderItems([
-      'Project'         => [null, [
-        'Name'            => $config->getProject(),
-        'Environment'     => $config->getEnvironment(),
-        'Domain'          => $config->getDomain(),
-        'Path'            => [$config->getWorkingDirectory(), [
-          'Docker'          => $config->getDocker(),
-          'Entrypoint'      => $config->getEntrypoint(),
-          'Framework'       => $config->getFramework(),
-          'Theme'           => $config->getTheme(),
-          'Commands'        => [null, $config->getCommandDirectories(false)],
-        ]],
-      ]],
-    ]);
+    $items = (new ListOfItems)
+      ->addGroup('Project', function ($group) use ($config) {
+        $group->addItem('Name', $config->getProject());
+        $group->addItem('Environment', $config->getEnvironment());
+        $group->addItem('Domain', $config->getDomain());
+
+        $group->addGroup('Paths', function ($group) use ($config) {
+          $group->addItem('Base', $config->getWorkingDirectory());
+          $group->addItem('Docker', $config->getDocker());
+          $group->addItem('Entrypoint', $config->getEntrypoint());
+          $group->addItem('Framework', $config->getFramework());
+          $group->addItem('Theme', $config->getTheme());
+
+          $group->addGroup('Commands', function ($group) use ($config) {
+            $group->addItems($config->getCommandDirectories(false));
+          });
+        });
+      });
+
+    return $this->renderItems($items);
   }
 
   /**
    * Render a list of items.
    *
-   * @param  array  $items
+   * @param  \Codohq\Binary\Components\ListOfItems  $items
    * @param  integer  $depth
+   * @param  string  $color  blue
    * @return string
    */
-  protected function renderItems(array $items, int $depth = 0): string
+  protected function renderItems(ListOfItems $items, int $depth = 0, $color = 'blue'): string
   {
     $content = '';
 
-    foreach ($items as $field => $value) {
-      list ($value, $children) = array_pad(Arr::wrap($value), 2, null);
-
+    foreach ($items->toArray() as $item) {
       $padding = (int) $depth * 2;
       $classes = $depth !== 0 ? "pl-{$padding}" : '';
       $prefix = $depth > 0 ? '<span class="text-gray">↳</span> ' : '';
 
-      $html = is_null($value) ? '' : <<<HTML
-        <span class="flex-1 content-repeat-[.] text-gray"></span>
-        <span class="font-bold text-blue">{$value}</span>
-      HTML;
+      if ($item instanceof ListOfItems) {
+        $value = $item->getValue() ? <<<HTML
+          <span class="flex-1 content-repeat-[.] text-gray"></span>
+          <span class="font-bold text-{$color}">{$item->getValue()}</span>
+        HTML : '';
 
-      if (is_null($children) or ! empty($children)) {
         $content .= <<<HTML
           <div class="flex space-x-1 {$classes}">
-            <span class="font-bold">{$prefix}{$field}</span>
-            {$html}
+            <span class="font-bold">{$prefix}{$item->getHeading()}</span>
+            {$value}
           </div>
         HTML;
+
+        $content .= $this->renderItems($item, $depth + 1);
+
+        continue;
       }
 
-      if (! empty($children)) {
-        $depth++;
-        $content .= $this->renderItems((array) $children, $depth);
-      }
+      $value = $item['value'] !== false ? <<<HTML
+        <span class="font-bold text-{$color}">{$item['value']}</span>
+      HTML : <<<HTML
+        <span class="font-bold text-red">N/A</span>
+      HTML;
+
+      $content .= <<<HTML
+        <div class="flex space-x-1 {$classes}">
+          <span class="font-bold">{$prefix}{$item['heading']}</span>
+          <span class="flex-1 content-repeat-[.] text-gray"></span>
+          {$value}
+        </div>
+      HTML;
     }
 
     return <<<HTML
@@ -140,40 +159,32 @@ class InfoCommand extends CodoCommand
   /**
    * Retrieve the version of the installed Docker binary.
    *
-   * @return string|null
+   * @return string|boolean
    */
-  protected function dockerVersion(): ?string
+  protected function dockerVersion(): string|bool
   {
-    list ($status, $output) = $this->silentProcess('docker --version');
-
-    if ($status !== 0) {
-      return $this->error($output);
-    }
+    $output = trim(shell_exec('docker --version'));
 
     preg_match('/(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?/', $output, $matches);
 
     $version = $matches[0] ?? false;
 
-    return $version ? "v{$version}" : 'Unknown';
+    return $version ? "v{$version}" : false;
   }
 
   /**
    * Retrieve the version of the installed Docker Compose binary.
    *
-   * @return string|null
+   * @return string|boolean
    */
-  protected function dockerComposeVersion(): ?string
+  protected function dockerComposeVersion(): string|bool
   {
-    list ($status, $output) = $this->silentProcess('docker compose version');
-
-    if ($status !== 0) {
-      return $this->error($output);
-    }
+    $output = trim(shell_exec('docker compose version'));
 
     preg_match('/(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?/', $output, $matches);
 
     $version = $matches[0] ?? false;
 
-    return $version ? "v{$version}" : 'Unknown';
+    return $version ? "v{$version}" : false;
   }
 }

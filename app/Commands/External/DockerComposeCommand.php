@@ -3,10 +3,13 @@
 namespace Codohq\Binary\Commands\External;
 
 use Illuminate\Support\Arr;
+use Codohq\Binary\Configuration;
 use function Termwind\{ render };
-use Codohq\Binary\Commands\CodoCommand;
+use Codohq\Binary\Commands\Command;
+use Codohq\Binary\Contracts\Commandable;
+use Codohq\Binary\Services\DockerCompose;
 
-class DockerComposeCommand extends CodoCommand
+class DockerComposeCommand extends Command
 {
   /**
    * The signature of the command.
@@ -47,33 +50,66 @@ class DockerComposeCommand extends CodoCommand
 
     $codo = app('codo');
 
-    $composeFiles = Arr::collapse(array_map(fn ($x) => ['-f', $x], array_filter([
-      $codo['config']->getDocker('docker-compose.yml', false),
-      $codo['config']->getDocker(sprintf('docker-compose.%s.yml', $codo['config']->getEnvironment()), false),
-    ])));
+    $process = (new DockerCompose)->on(
+      $command = $this->buildCommand($codo['config'])
+    );
 
-    $arguments = [
-      '--project-name',
-      $codo['config']->getProject(),
+    $process->run();
 
-      '--env-file',
-      $codo['config']->getEntrypoint('.env', true),
+    return $process->getExitCode();
+  }
 
-      ...$composeFiles,
+  /**
+   * Build the command.
+   *
+   * @param  \Codohq\Binary\Configuration  $codo
+   * @return \Codohq\Binary\Contracts\Commandable
+   */
+  protected function buildCommand(Configuration $codo): Commandable
+  {
+    return new class($this, $codo) implements Commandable
+    {
+      /**
+       * Instantiate a new anonymous commandable object.
+       *
+       * @param  \Codohq\Binary\Commands\Command  $console
+       * @param  \Codohq\Binary\Configuration  $codo
+       * @return void
+       */
+      public function __construct(protected Command $console, protected Configuration $codo)
+      {
+        //
+      }
 
-      ...$this->getArgv(),
-    ];
+      /**
+       * Get the instance as an array.
+       *
+       * @return array<TKey, TValue>
+       */
+      public function toArray()
+      {
+        return $this->console->getArgv();
+      }
 
-    list ($status, $output) = $this->process('docker compose', $arguments);
+      /**
+       * Retrieve the working directory for the command.
+       *
+       * @return string|null
+       */
+      public function workspace(): ?string
+      {
+        return null;
+      }
 
-    if ($status !== 0) {
-      $this->error($output);
-
-      return $status;
-    }
-
-    $this->info($output);
-
-    return 0;
+      /**
+       * Retrieve the environment variables for which the command is run with.
+       *
+       * @return array
+       */
+      public function environment(): array
+      {
+        return $this->codo->getEnvironmentVariables();
+      }
+    };
   }
 }

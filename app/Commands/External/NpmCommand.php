@@ -2,10 +2,13 @@
 
 namespace Codohq\Binary\Commands\External;
 
+use Codohq\Binary\Services\Npm;
+use Codohq\Binary\Configuration;
 use function Termwind\{ render };
-use Codohq\Binary\Commands\CodoCommand;
+use Codohq\Binary\Commands\Command;
+use Codohq\Binary\Contracts\Commandable;
 
-class NpmCommand extends CodoCommand
+class NpmCommand extends Command
 {
   /**
    * The signature of the command.
@@ -46,46 +49,77 @@ class NpmCommand extends CodoCommand
 
     $codo = app('codo');
 
-    $package = $this->locatePackageJsonFile(getcwd());
+    $process = (new Npm)->on(
+      $command = $this->buildCommand($codo['config'])
+    );
 
-    $workdir = $this->option('workdir')
-      ?? ($package ? dirname($package) : $codo['config']->getTheme(null, true));
+    $process->run();
 
-    list ($status, $output) = $this->runningProcess('npm', $this->getArgv(), $workdir);
-
-    if (! empty($output)) {
-      if (! empty($status)) {
-        $this->error($output);
-
-        return $status;
-      }
-
-      $this->info($output);
-    }
-
-    return 0;
+    return $process->getExitCode();
   }
 
   /**
-   * Retrieve the absolute path to the closest package.json file.
+   * Build the command.
    *
-   * @param  string  $directory
-   * @return string|null
+   * @param  \Codohq\Binary\Configuration  $codo
+   * @return \Codohq\Binary\Contracts\Commandable
    */
-  protected function locatePackageJsonFile(string $directory): ?string
+  protected function buildCommand(Configuration $codo): Commandable
   {
-    $expected = sprintf('%s/package.json', $directory);
+    return new class($this, $codo) implements Commandable
+    {
+      /**
+       * Holds the package.json path.
+       *
+       * @var string|null
+       */
+      protected ?string $package;
 
-    $parent = dirname($directory);
+      /**
+       * Instantiate a new anonymous commandable object.
+       *
+       * @param  \Codohq\Binary\Commands\Command  $console
+       * @param  \Codohq\Binary\Configuration  $codo
+       * @return void
+       */
+      public function __construct(protected Command $console, protected Configuration $codo)
+      {
+        $this->package = $console->locateFile(
+          sprintf('%s/package.json', getcwd())
+        );
+      }
 
-    if (in_array($parent, ['/', '\\', '.'])) {
-      return null;
-    }
+      /**
+       * Get the instance as an array.
+       *
+       * @return array<TKey, TValue>
+       */
+      public function toArray()
+      {
+        return $this->console->getArgv();
+      }
 
-    if (! is_file($expected)) {
-      return $this->locatePackageJsonFile($parent);
-    }
+      /**
+       * Retrieve the working directory for the command.
+       *
+       * @return string|null
+       */
+      public function workspace(): ?string
+      {
+        return $this->console->option('workdir') ?? (
+          $this->package ? dirname($this->package) : $this->codo->getTheme(null, true)
+        );
+      }
 
-    return $expected;
+      /**
+       * Retrieve the environment variables for which the command is run with.
+       *
+       * @return array
+       */
+      public function environment(): array
+      {
+        return $this->codo->getEnvironmentVariables();
+      }
+    };
   }
 }
