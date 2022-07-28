@@ -32,11 +32,14 @@ trait InteractsWithArgv
    *
    * @param  string  $command
    * @param  array  $arguments  []
+   * @param  boolean  $merge  true
    * @return mixed
    */
-  public function callWithArgv(string $command, array $arguments = []): mixed
+  public function callWithArgv(string $command, array $arguments = [], bool $merge = true): mixed
   {
-    $arguments = array_merge($arguments, $this->getArgv());
+    if ($merge) {
+      $arguments = array_merge($arguments, $this->getArgv());
+    }
 
     $this->setArgv($arguments);
 

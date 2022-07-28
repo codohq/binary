@@ -49,9 +49,6 @@ class UpCommand extends Command
       '--force-recreate',
       '--remove-orphans',
       '--build',
-      // '--detach',
-      // '--quiet-pull',
-      // '--no-color',
     ]);
   }
 }

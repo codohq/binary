@@ -1,26 +1,25 @@
 <?php
 
-namespace Codohq\Binary\Commands\External;
+namespace Codohq\Binary\Commands\Codo;
 
 use Codohq\Binary\Commands;
-use function Termwind\{ render };
 use Codohq\Binary\Commands\Command;
 
-class ArtisanCommand extends Command
+class ShellCommand extends Command
 {
   /**
    * The signature of the command.
    *
    * @var string
    */
-  protected $signature = 'artisan {--c|--container=php}';
+  protected $signature = 'shell {container} {--s|--shell=/bin/sh}';
 
   /**
    * The description of the command.
    *
    * @var string
    */
-  protected $description = 'Laravel Artisan wrapper command.';
+  protected $description = 'Open a shell for the specified Docker container.';
 
   /**
    * Create a new command instance.
@@ -41,15 +40,18 @@ class ArtisanCommand extends Command
    */
   public function handle()
   {
-    $container = $this->option('container');
+    if ($this->isIneligible()) {
+      return $this->ineligible();
+    }
+
+    $container = $this->argument('container');
+
+    $shell = $this->option('shell');
 
     return $this->callWithArgv(Commands\External\DockerComposeCommand::class, [
-      'run',
-      '--rm',
-      '--interactive',
-      '--tty',
+      'exec',
       $container,
-      './artisan',
-    ]);
+      $shell,
+    ], false);
   }
 }
