@@ -2,7 +2,6 @@
 
 namespace Codohq\Binary\Commands\External;
 
-use Illuminate\Support\Arr;
 use Codohq\Binary\Configuration;
 use function Termwind\{ render };
 use Codohq\Binary\Commands\Command;
@@ -16,7 +15,7 @@ class DockerComposeCommand extends Command
    *
    * @var string
    */
-  protected $signature = 'docker:compose';
+  protected $signature = 'compose';
 
   /**
    * The description of the command.

@@ -2,27 +2,27 @@
 
 namespace Codohq\Binary\Commands\External;
 
-use Codohq\Binary\Services\Npm;
 use Codohq\Binary\Configuration;
 use function Termwind\{ render };
 use Codohq\Binary\Commands\Command;
 use Codohq\Binary\Contracts\Commandable;
+use Codohq\Binary\Services\DockerCompose;
 
-class NpmCommand extends Command
+class ComposerCommand extends Command
 {
   /**
    * The signature of the command.
    *
    * @var string
    */
-  protected $signature = 'npm {--w|workdir=}';
+  protected $signature = 'composer {--c|--container=php}';
 
   /**
    * The description of the command.
    *
    * @var string
    */
-  protected $description = 'Npm wrapper command.';
+  protected $description = 'Composer wrapper command.';
 
   /**
    * Create a new command instance.
@@ -49,7 +49,7 @@ class NpmCommand extends Command
 
     $codo = app('codo');
 
-    $process = (new Npm)->on(
+    $process = (new DockerCompose)->on(
       $command = $this->buildCommand($codo['config'])
     );
 
@@ -69,13 +69,6 @@ class NpmCommand extends Command
     return new class($this, $codo) implements Commandable
     {
       /**
-       * Holds the package.json path.
-       *
-       * @var string|null
-       */
-      protected ?string $package;
-
-      /**
        * Instantiate a new anonymous commandable object.
        *
        * @param  \Codohq\Binary\Commands\Command  $console
@@ -84,9 +77,7 @@ class NpmCommand extends Command
        */
       public function __construct(protected Command $console, protected Configuration $codo)
       {
-        $this->package = $console->locateFile(
-          sprintf('%s/package.json', getcwd())
-        );
+        //
       }
 
       /**
@@ -106,9 +97,7 @@ class NpmCommand extends Command
        */
       public function workspace(): ?string
       {
-        return $this->console->option('workdir') ?? (
-          $this->package ? dirname($this->package) : $this->codo->getTheme(null, true)
-        );
+        return null;
       }
 
       /**

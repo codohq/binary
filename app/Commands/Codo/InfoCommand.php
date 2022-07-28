@@ -34,7 +34,7 @@ class InfoCommand extends Command
     $codo = app('codo');
 
     render(<<<HTML
-      <div class="mx-2 my-1">
+      <div class="my-1">
         <div class="space-x-1">
           <span class="px-1 bg-black font-bold text-white uppercase">Codo</span>
           <span>{$codo['version']}</span>

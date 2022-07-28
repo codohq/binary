@@ -1,25 +1,26 @@
 <?php
 
-namespace Codohq\Binary\Commands\Codo;
+namespace Codohq\Binary\Commands\External;
 
 use Codohq\Binary\Commands;
+use function Termwind\{ render };
 use Codohq\Binary\Commands\Command;
 
-class UpCommand extends Command
+class ArtisanCommand extends Command
 {
   /**
    * The signature of the command.
    *
    * @var string
    */
-  protected $signature = 'up';
+  protected $signature = 'artisan {--c|--container=php}';
 
   /**
    * The description of the command.
    *
    * @var string
    */
-  protected $description = 'Boot the Codo project.';
+  protected $description = 'Laravel Artisan wrapper command.';
 
   /**
    * Create a new command instance.
@@ -40,18 +41,13 @@ class UpCommand extends Command
    */
   public function handle()
   {
-    if ($this->isIneligible()) {
-      return $this->ineligible();
-    }
-
     return $this->callWithArgv(Commands\External\DockerComposeCommand::class, [
-      'up',
-      '--force-recreate',
-      '--remove-orphans',
-      '--build',
-      // '--detach',
-      // '--quiet-pull',
-      // '--no-color',
+      'run',
+      '--rm',
+      '--interactive',
+      '--tty',
+      'php',
+      './artisan',
     ]);
   }
 }

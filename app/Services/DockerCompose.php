@@ -2,6 +2,7 @@
 
 namespace Codohq\Binary\Services;
 
+use Illuminate\Support\Arr;
 use Codohq\Binary\Contracts\ExternalProgram;
 use Codohq\Binary\Concerns\InteractsWithProcesses;
 
