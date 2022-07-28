@@ -97,7 +97,7 @@ class DockerComposeCommand extends Command
        */
       public function workspace(): ?string
       {
-        return null;
+        return $this->codo->getWorkingDirectory();
       }
 
       /**
