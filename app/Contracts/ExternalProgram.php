@@ -16,6 +16,13 @@ interface ExternalProgram
   public function prepare(array $arguments): array;
 
   /**
+   * Retrieve the external program's version.
+   *
+   * @return string|null
+   */
+  public static function version(): ?string;
+
+  /**
    * Initiate a one-off command process.
    *
    * @param  \Codohq\Binary\Contracts\Commandable  $command

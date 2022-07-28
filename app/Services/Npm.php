@@ -19,4 +19,14 @@ class Npm implements ExternalProgram
   {
     return array_merge(['npm'], $arguments);
   }
+
+  /**
+   * Retrieve the external program's version.
+   *
+   * @return string|null
+   */
+  public static function version(): ?string
+  {
+    return null;
+  }
 }

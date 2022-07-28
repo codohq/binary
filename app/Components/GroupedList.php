@@ -5,7 +5,7 @@ namespace Codohq\Binary\Components;
 use Closure;
 use Illuminate\Contracts\Support\Arrayable;
 
-class ListOfItems implements Arrayable
+class GroupedList implements Arrayable
 {
   /**
    * Holds the list of items.
@@ -44,15 +44,23 @@ class ListOfItems implements Arrayable
    *
    * @param  string  $heading
    * @param  mixed  $value
-   * @param  callable|null  $callback  null
+   * @param  string|callable|null  $callback  null
    * @return $this
    */
-  public function addItem(string $heading, mixed $value, ?callable $callback = null): self
+  public function addItem(string $heading, mixed $value, string|callable|null $callback = null): self
   {
+    $renderer = $this->render();
+
+    if (is_callable($callback)) {
+      $value = $callback($value);
+    } else if (is_string($callback) and method_exists($renderer, $callback)) {
+      $value = $renderer->$callback($value);
+    }
+
     $this->items[] = [
       'type'    => 'item',
       'heading' => $heading,
-      'value'   => is_callable($callback) ? $callback($value) : $value,
+      'value'   => $value,
     ];
 
     return $this;
@@ -62,10 +70,10 @@ class ListOfItems implements Arrayable
    * Add numerous items to the list at once.
    *
    * @param  array  $items
-   * @param  callable|null  $callback  null
+   * @param  string|callable|null  $callback  null
    * @return $this
    */
-  public function addItems(array $items, ?callable $callback = null): self
+  public function addItems(array $items, string|callable|null $callback = null): self
   {
     foreach ($items as $heading => $value) {
       $this->addItem($heading, $value, $callback);
@@ -148,5 +156,15 @@ class ListOfItems implements Arrayable
   public function toArray()
   {
     return (array) $this->items;
+  }
+
+  /**
+   * Render the component.
+   *
+   * @return
+   */
+  public function render()
+  {
+    return new Renderers\GroupedListRenderer($this);
   }
 }
