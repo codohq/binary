@@ -44,14 +44,15 @@ class ListOfItems implements Arrayable
    *
    * @param  string  $heading
    * @param  mixed  $value
+   * @param  callable|null  $callback  null
    * @return $this
    */
-  public function addItem(string $heading, mixed $value): self
+  public function addItem(string $heading, mixed $value, ?callable $callback = null): self
   {
     $this->items[] = [
       'type'    => 'item',
       'heading' => $heading,
-      'value'   => $value,
+      'value'   => is_callable($callback) ? $callback($value) : $value,
     ];
 
     return $this;
@@ -61,12 +62,13 @@ class ListOfItems implements Arrayable
    * Add numerous items to the list at once.
    *
    * @param  array  $items
+   * @param  callable|null  $callback  null
    * @return $this
    */
-  public function addItems(array $items): self
+  public function addItems(array $items, ?callable $callback = null): self
   {
     foreach ($items as $heading => $value) {
-      $this->addItem($heading, $value);
+      $this->addItem($heading, $value, $callback);
     }
 
     return $this;
