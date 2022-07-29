@@ -20,6 +20,6 @@ cat $SRC/$PHPVER/micro-$ARCH.sfx $APP/application > $APP/tmp-codo
 
 chmod +x $APP/tmp-codo
 
-$APP/tmp-codo $@
+$APP/tmp-codo "$@"
 
 exit 0
