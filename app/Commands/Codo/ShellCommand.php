@@ -48,8 +48,17 @@ class ShellCommand extends Command
 
     $shell = $this->option('shell');
 
+    // $exitCode = $this->callWithArgv(Commands\External\DockerComposeCommand::class, [
+    //   'ps',
+    //   $container,
+    //   '--status', 'running',
+    //   '-q',
+    // ]);
+
     return $this->callWithArgv(Commands\External\DockerComposeCommand::class, [
-      'exec',
+      'run',
+      '-it',
+      '--rm',
       $container,
       $shell,
     ], false);

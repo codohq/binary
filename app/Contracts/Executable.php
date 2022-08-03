@@ -5,7 +5,7 @@ namespace Codohq\Binary\Contracts;
 use Symfony\Component\Process\Process;
 use Codohq\Binary\Contracts\Commandable;
 
-interface ExternalProgram
+interface Executable
 {
   /**
    * Prepare the external program.

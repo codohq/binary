@@ -17,7 +17,9 @@ trait InteractsWithProcesses
   {
     $cmd = $this->prepare($command->toArray());
 
-    return new Process($cmd, $command->workspace(), $command->environment());
+    $process = new Process($cmd, $command->workspace(), $command->environment());
+
+    return $process;
   }
 
   /**
@@ -32,9 +34,9 @@ trait InteractsWithProcesses
 
     $process = new Process($cmd, $command->workspace(), $command->environment());
 
-    $process->setTty(true);
-    $process->setTimeout(0);
-    $process->setIdleTimeout(0);
+    $process->setTty(Process::isTtySupported());
+    $process->setTimeout(null);
+    $process->setIdleTimeout(null);
 
     return $process;
   }

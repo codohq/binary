@@ -2,39 +2,26 @@
 
 namespace Codohq\Binary\Commands\External;
 
-use Codohq\Binary\Services\Npm;
 use Codohq\Binary\Configuration;
-use function Termwind\{ render };
+use Codohq\Binary\Services\Mkcert;
 use Codohq\Binary\Commands\Command;
 use Codohq\Binary\Contracts\Commandable;
 
-class NpmCommand extends Command
+class MkcertCommand extends Command
 {
   /**
    * The signature of the command.
    *
    * @var string
    */
-  protected $signature = 'npm {--w|workdir=} {--c|--container=node}';
+  protected $signature = 'mkcert {--w|workdir=}';
 
   /**
    * The description of the command.
    *
    * @var string
    */
-  protected $description = 'Npm wrapper command.';
-
-  /**
-   * Create a new command instance.
-   *
-   * @return void
-   */
-  public function __construct()
-  {
-    parent::__construct();
-
-    $this->ignoreValidationErrors();
-  }
+  protected $description = 'Mkcert wrapper command.';
 
   /**
    * Execute the console command.
@@ -43,26 +30,13 @@ class NpmCommand extends Command
    */
   public function handle()
   {
-    // $container = $this->option('container');
-
-    // return $this->callWithArgv(DockerComposeCommand::class, [
-    //   'run',
-    //   '--rm',
-    //   '--interactive',
-    //   '--tty',
-    //   $container,
-    //   'npm',
-    //   '--workspace=/opt/codo',
-    //   '--workspace=/opt/vite',
-    // ]);
-
     if ($this->isIneligible()) {
       return $this->ineligible();
     }
 
     $codo = app('codo');
 
-    $process = (new Npm(local: false))->on(
+    $process = (new Mkcert)->on(
       $command = $this->buildCommand($codo['config'])
     );
 
@@ -97,9 +71,7 @@ class NpmCommand extends Command
        */
       public function __construct(protected Command $console, protected Configuration $codo)
       {
-        $this->package = $console->locateFile(
-          sprintf('%s/package.json', getcwd())
-        );
+        //
       }
 
       /**
@@ -119,9 +91,7 @@ class NpmCommand extends Command
        */
       public function workspace(): ?string
       {
-        return $this->console->option('workdir') ?? (
-          $this->package ? dirname($this->package) : $this->codo->getTheme(null, true)
-        );
+        return $this->console->option('workdir') ?? $this->codo->getDocker('certificates', true);
       }
 
       /**

@@ -2,7 +2,7 @@
 
 namespace Codohq\Binary;
 
-use Illuminate\Support\Collection;
+use Illuminate\Support\{ Collection, Str };
 
 class Configuration
 {
@@ -36,8 +36,10 @@ class Configuration
       'CODO_UID'              => trim(shell_exec('id -u')),
       'CODO_GID'              => trim(shell_exec('id -g')),
       'CODO_BASEPATH'         => realpath($this->workdir),
+      'CODO_DOMAIN'           => $this->getDomain(),
       'CODO_DOCKER'           => $this->getDocker(),
       'CODO_DOCKER_FULL'      => $this->getDocker(null, true),
+      'CODO_DOCKER_NETWORK'   => sprintf('codo-network-%s', $this->getProject()),
       'CODO_ENTRYPOINT'       => $this->getEntrypoint(),
       'CODO_ENTRYPOINT_FULL'  => $this->getEntrypoint(null, true),
       'CODO_FRAMEWORK'        => $this->getFramework(),
@@ -56,7 +58,7 @@ class Configuration
   {
     $fallback = basename($this->getWorkingDirectory());
 
-    return $this->get('settings.name', $fallback);
+    return Str::slug($this->get('settings.name', $fallback));
   }
 
   /**
@@ -188,13 +190,19 @@ class Configuration
    */
   protected function resolvePath(string $path, ?string $subpath = null, bool $absolute = false): string
   {
-    $fullpath = implode($separator = DIRECTORY_SEPARATOR, [
+    $separator = DIRECTORY_SEPARATOR;
+
+    $callback = function ($value) use ($separator) {
+      return preg_replace('/'.preg_quote("{$separator}.{$separator}", '/').'/', $separator, $value);
+    };
+
+    $fullpath = implode($separator, [
       rtrim($path, $separator),
       trim($subpath, $separator),
     ]);
 
     if (! $absolute) {
-      return rtrim($fullpath, $separator);
+      return $callback(rtrim($fullpath, $separator));
     }
 
     $fullpath = implode($separator, [
@@ -202,6 +210,6 @@ class Configuration
       trim($fullpath, $separator),
     ]);
 
-    return rtrim($fullpath, $separator);
+    return $callback(rtrim($fullpath, $separator));
   }
 }

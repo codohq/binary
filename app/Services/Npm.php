@@ -2,12 +2,23 @@
 
 namespace Codohq\Binary\Services;
 
-use Codohq\Binary\Contracts\ExternalProgram;
+use Codohq\Binary\Contracts\Executable;
 use Codohq\Binary\Concerns\InteractsWithProcesses;
 
-class Npm implements ExternalProgram
+class Npm implements Executable
 {
   use InteractsWithProcesses;
+
+  /**
+   * Instantiate a new service object.
+   *
+   * @param  boolean  $local  false
+   * @return void
+   */
+  public function __construct(protected bool $local = false)
+  {
+    //
+  }
 
   /**
    * Prepare the external program.
@@ -17,7 +28,15 @@ class Npm implements ExternalProgram
    */
   public function prepare(array $arguments): array
   {
-    return array_merge(['npm'], $arguments);
+    if ($this->local) {
+      return array_merge(['npm'], $arguments);
+    }
+
+    return (new DockerCompose)->prepare(array_merge([
+      'exec',
+      'node',
+      'npm',
+    ], $arguments));
   }
 
   /**

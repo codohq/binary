@@ -3,6 +3,7 @@
 namespace Codohq\Binary\Concerns;
 
 use Symfony\Component\Process\Process;
+use Symfony\Component\Console\Output\BufferedOutput;
 
 trait InteractsWithArgv
 {

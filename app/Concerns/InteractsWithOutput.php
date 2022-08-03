@@ -31,14 +31,21 @@ trait InteractsWithOutput
   /**
    * Render a warning for when a command is being run outside of a Codo project.
    *
+   * @param  boolean  $render  true
    * @return string
    */
-  public function ineligible(): string
+  public function ineligible(bool $render = true): string
   {
-    return <<<HTML
-      <div class="mt-1 text-yellow">
+    $html = <<<HTML
+      <div class="text-yellow">
         Unable to locate a codo.yml file.
       </div>
     HTML;
+
+    if ($render) {
+      render($html);
+    }
+
+    return $html;
   }
 }

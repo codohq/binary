@@ -15,7 +15,7 @@ class InfoCommand extends Command
    *
    * @var string
    */
-  protected $signature = 'info';
+  protected $signature = 'info {--e|--env-variables}';
 
   /**
    * The description of the command.
@@ -33,6 +33,8 @@ class InfoCommand extends Command
   {
     $codo = app('codo');
 
+    $variables = $this->option('env-variables') ? $this->envVariables($codo['config']) : null;
+
     render(<<<HTML
       <div class="my-1">
         <div class="space-x-1">
@@ -42,6 +44,7 @@ class InfoCommand extends Command
         <div class="mt-1 space-y-1">
           {$this->prerequisites()}
           {$this->projectConfiguration($codo['config'])}
+          {$variables}
         </div>
       </div>
     HTML);
@@ -74,7 +77,7 @@ class InfoCommand extends Command
   protected function projectConfiguration(?Configuration $config): ?string
   {
     if ($this->isIneligible()) {
-      return $this->ineligible();
+      return $this->ineligible(render: false);
     }
 
     $items = (new GroupedList)
@@ -93,6 +96,32 @@ class InfoCommand extends Command
           $group->addGroup('Commands', function ($group) use ($config) {
             $group->addItems($config->getCommandDirectories(false), 'renderValue');
           });
+        });
+      });
+
+    return $items->render();
+  }
+
+  /**
+   * Render a list of the project's environment variables.
+   *
+   * @param  \Codohq\Binary\Configuration|null  $config
+   * @return string|null
+   */
+  protected function envVariables(?Configuration $config): ?string
+  {
+    if ($this->isIneligible()) {
+      return $this->ineligible(render: false);
+    }
+
+    $envVariables = $config->getEnvironmentVariables();
+
+    $items = (new GroupedList)
+      ->addGroup('', function ($group) use ($envVariables) {
+        $group->addGroup('Environment Variables', function ($group) use ($envVariables) {
+          foreach ($envVariables as $variable => $value) {
+            $group->addItem($variable, $value, 'renderValue');
+          }
         });
       });
 

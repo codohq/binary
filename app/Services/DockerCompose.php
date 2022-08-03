@@ -3,10 +3,10 @@
 namespace Codohq\Binary\Services;
 
 use Illuminate\Support\Arr;
-use Codohq\Binary\Contracts\ExternalProgram;
+use Codohq\Binary\Contracts\Executable;
 use Codohq\Binary\Concerns\InteractsWithProcesses;
 
-class DockerCompose implements ExternalProgram
+class DockerCompose implements Executable
 {
   use InteractsWithProcesses;
 
@@ -21,8 +21,8 @@ class DockerCompose implements ExternalProgram
     $codo = app('codo');
 
     $files = Arr::collapse(array_map(fn ($x) => ['-f', $x], array_filter([
-      $codo['config']->getDocker('docker-compose.yml', false),
-      $codo['config']->getDocker(sprintf('docker-compose.%s.yml', $codo['config']->getEnvironment()), false),
+      $codo['config']->getDocker('docker-compose.yml', true),
+      $codo['config']->getDocker(sprintf('docker-compose.%s.yml', $codo['config']->getEnvironment()), true),
     ])));
 
     $arguments = [

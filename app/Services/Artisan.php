@@ -2,10 +2,10 @@
 
 namespace Codohq\Binary\Services;
 
-use Codohq\Binary\Contracts\ExternalProgram;
+use Codohq\Binary\Contracts\Executable;
 use Codohq\Binary\Concerns\InteractsWithProcesses;
 
-class Artisan implements ExternalProgram
+class Artisan implements Executable
 {
   use InteractsWithProcesses;
 

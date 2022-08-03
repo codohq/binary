@@ -5,7 +5,7 @@ namespace Codohq\Binary\Services;
 use Codohq\Binary\Contracts\Executable;
 use Codohq\Binary\Concerns\InteractsWithProcesses;
 
-class Composer implements Executable
+class Npx implements Executable
 {
   use InteractsWithProcesses;
 
@@ -17,7 +17,7 @@ class Composer implements Executable
    */
   public function prepare(array $arguments): array
   {
-    return array_merge(['composer'], $arguments);
+    return array_merge(['npx'], $arguments);
   }
 
   /**
