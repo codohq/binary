@@ -22,18 +22,6 @@ class UpCommand extends Command
   protected $description = 'Boot the Codo project.';
 
   /**
-   * Create a new command instance.
-   *
-   * @return void
-   */
-  public function __construct()
-  {
-    parent::__construct();
-
-    $this->ignoreValidationErrors();
-  }
-
-  /**
    * Execute the console command.
    *
    * @return mixed
@@ -44,7 +32,7 @@ class UpCommand extends Command
       return $this->ineligible();
     }
 
-    return $this->callWithArgv(Commands\External\DockerComposeCommand::class, [
+    return $this->call(Commands\External\DockerComposeCommand::class, [
       'up',
       '--force-recreate',
       '--remove-orphans',

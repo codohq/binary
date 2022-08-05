@@ -22,18 +22,6 @@ class GenerateCertificatesCommand extends Command
   protected $description = 'Generate the self-signed certificates for local development.';
 
   /**
-   * Create a new command instance.
-   *
-   * @return void
-   */
-  public function __construct()
-  {
-    parent::__construct();
-
-    $this->ignoreValidationErrors();
-  }
-
-  /**
    * Execute the console command.
    *
    * @return mixed
@@ -46,7 +34,7 @@ class GenerateCertificatesCommand extends Command
 
     $codo = app('codo');
 
-    return $this->callWithArgv(Commands\External\MkcertCommand::class, array_filter([
+    return $this->call(Commands\External\MkcertCommand::class, array_filter([
       $codo['config']->getDomain(),
       $this->option('wildcard') ? '*.'.$codo['config']->getDomain() : null,
     ]));

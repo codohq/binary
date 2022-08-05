@@ -23,18 +23,6 @@ class ArtisanCommand extends Command
   protected $description = 'Laravel Artisan wrapper command.';
 
   /**
-   * Create a new command instance.
-   *
-   * @return void
-   */
-  public function __construct()
-  {
-    parent::__construct();
-
-    $this->ignoreValidationErrors();
-  }
-
-  /**
    * Execute the console command.
    *
    * @return mixed
@@ -43,7 +31,7 @@ class ArtisanCommand extends Command
   {
     $container = $this->option('container');
 
-    return $this->callWithArgv(Commands\External\DockerComposeCommand::class, [
+    return $this->call(Commands\External\DockerComposeCommand::class, [
       'run',
       '--rm',
       '--interactive',

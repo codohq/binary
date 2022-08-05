@@ -22,18 +22,6 @@ class DownCommand extends Command
   protected $description = 'Shutdown the Codo project.';
 
   /**
-   * Create a new command instance.
-   *
-   * @return void
-   */
-  public function __construct()
-  {
-    parent::__construct();
-
-    $this->ignoreValidationErrors();
-  }
-
-  /**
    * Execute the console command.
    *
    * @return mixed
@@ -44,7 +32,7 @@ class DownCommand extends Command
       return $this->ineligible();
     }
 
-    return $this->callWithArgv(Commands\External\DockerComposeCommand::class, [
+    return $this->call(Commands\External\DockerComposeCommand::class, [
       'down',
       '--remove-orphans',
     ]);

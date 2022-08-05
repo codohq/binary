@@ -81,7 +81,7 @@ class MkcertCommand extends Command
        */
       public function toArray()
       {
-        return $this->console->getArgv();
+        return $this->console->getExternalArguments();
       }
 
       /**

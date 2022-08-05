@@ -25,37 +25,12 @@ class NpmCommand extends Command
   protected $description = 'Npm wrapper command.';
 
   /**
-   * Create a new command instance.
-   *
-   * @return void
-   */
-  public function __construct()
-  {
-    parent::__construct();
-
-    $this->ignoreValidationErrors();
-  }
-
-  /**
    * Execute the console command.
    *
    * @return mixed
    */
   public function handle()
   {
-    // $container = $this->option('container');
-
-    // return $this->callWithArgv(DockerComposeCommand::class, [
-    //   'run',
-    //   '--rm',
-    //   '--interactive',
-    //   '--tty',
-    //   $container,
-    //   'npm',
-    //   '--workspace=/opt/codo',
-    //   '--workspace=/opt/vite',
-    // ]);
-
     if ($this->isIneligible()) {
       return $this->ineligible();
     }
@@ -109,7 +84,7 @@ class NpmCommand extends Command
        */
       public function toArray()
       {
-        return $this->console->getArgv();
+        return $this->console->getExternalArguments();
       }
 
       /**

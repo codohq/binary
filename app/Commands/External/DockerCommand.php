@@ -26,18 +26,6 @@ class DockerCommand extends Command
   protected $description = 'Docker wrapper command.';
 
   /**
-   * Create a new command instance.
-   *
-   * @return void
-   */
-  public function __construct()
-  {
-    parent::__construct();
-
-    $this->ignoreValidationErrors();
-  }
-
-  /**
    * Execute the console command.
    *
    * @return mixed
@@ -88,7 +76,7 @@ class DockerCommand extends Command
        */
       public function toArray()
       {
-        return $this->console->getArgv();
+        return $this->console->getExternalArguments();
       }
 
       /**

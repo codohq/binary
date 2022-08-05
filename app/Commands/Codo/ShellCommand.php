@@ -22,18 +22,6 @@ class ShellCommand extends Command
   protected $description = 'Open a shell for the specified Docker container.';
 
   /**
-   * Create a new command instance.
-   *
-   * @return void
-   */
-  public function __construct()
-  {
-    parent::__construct();
-
-    $this->ignoreValidationErrors();
-  }
-
-  /**
    * Execute the console command.
    *
    * @return mixed
@@ -55,12 +43,12 @@ class ShellCommand extends Command
     //   '-q',
     // ]);
 
-    return $this->callWithArgv(Commands\External\DockerComposeCommand::class, [
+    return $this->call(Commands\External\DockerComposeCommand::class, [
       'run',
       '-it',
       '--rm',
       $container,
       $shell,
-    ], false);
+    ]);
   }
 }
