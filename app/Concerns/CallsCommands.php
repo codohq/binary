@@ -3,8 +3,6 @@
 namespace Codohq\Binary\Concerns;
 
 use Closure;
-use Symfony\Component\VarDumper\Dumper\CliDumper;
-use Symfony\Component\VarDumper\Cloner\VarCloner;
 use Codohq\Binary\Input\{ ArgvInput, ArrayInput };
 use Symfony\Component\Console\Input as SymfonyInput;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -14,11 +12,23 @@ trait CallsCommands
   /**
    * {@inheritdoc}
    */
+  protected function exec(string $method, $command, array $arguments)
+  {
+    // $this->components->info($command);
+
+    // $this->info(implode(' ', $arguments));
+
+    // $this->newLine();
+
+    return parent::$method($command, $arguments);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function call($command, array $arguments = [])
   {
-    $arguments = array_merge($arguments, $this->getExternalArguments());
-
-    return parent::call($command, $arguments);
+    return $this->exec('call', $command, $this->getExternalArguments($arguments));
   }
 
   /**
@@ -26,9 +36,7 @@ trait CallsCommands
    */
   public function callSilent($command, array $arguments = [])
   {
-    $arguments = array_merge($arguments, $this->getExternalArguments());
-
-    return parent::callSilent($command, $arguments);
+    return $this->exec('callSilent', $command, $this->getExternalArguments($arguments));
   }
 
   /**
@@ -83,13 +91,14 @@ trait CallsCommands
   /**
    * Retrieves all of the external arguments.
    *
+   * @param  array  $arguments  []
    * @return array
    */
-  public function getExternalArguments(): array
+  public function getExternalArguments(array $arguments = []): array
   {
-    return method_exists($this->input, 'getExternalArguments')
-      ? $this->input->getExternalArguments()
-      : [];
+    return (! is_null($this->input) and method_exists($this->input, 'getExternalArguments'))
+      ? array_merge($arguments, $this->input->getExternalArguments())
+      : array_merge($arguments, []);
   }
 
   /**

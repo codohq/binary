@@ -6,21 +6,21 @@ use Codohq\Binary\Commands;
 use function Termwind\{ render };
 use Codohq\Binary\Commands\Command;
 
-class ComposerCommand extends Command
+class PhpCommand extends Command
 {
   /**
    * The signature of the command.
    *
    * @var string
    */
-  protected $signature = 'composer {--c|--container=php}';
+  protected $signature = 'php {--c|--container=php}';
 
   /**
    * The description of the command.
    *
    * @var string
    */
-  protected $description = 'Composer wrapper command.';
+  protected $description = 'PHP wrapper command.';
 
   /**
    * Execute the console command.
@@ -42,7 +42,6 @@ class ComposerCommand extends Command
       '--tty',
       ...$volume,
       $container,
-      'composer',
     ]));
   }
 }

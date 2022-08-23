@@ -3,7 +3,10 @@
 namespace Codohq\Binary\Commands;
 
 use Codohq\Binary\Concerns;
+use Illuminate\Support\Str;
 use Illuminate\Console\Scheduling\Schedule;
+use Symfony\Component\VarDumper\Dumper\CliDumper;
+use Symfony\Component\VarDumper\Cloner\VarCloner;
 use LaravelZero\Framework\Commands\Command as Base;
 
 abstract class Command extends Base
@@ -49,10 +52,18 @@ abstract class Command extends Base
    */
   public function locateFile(string $file): ?string
   {
+    $codo = app('codo');
+
+    $workingDirectory = $codo['config']->getWorkingDirectory();
+
     $filename = basename($file);
     $directory = dirname($file);
 
     $parent = dirname($directory);
+
+    if (! str_starts_with($directory, $workingDirectory)) {
+      return null;
+    }
 
     if (in_array($parent, ['/', '\\', '.'])) {
       return null;
@@ -63,5 +74,23 @@ abstract class Command extends Base
     }
 
     return $file;
+  }
+
+  /**
+   * Generate the docker volume arguments for the given path.
+   *
+   * @param  string|null  $file  null
+   * @return array
+   */
+  public function dockerVolume(?string $file = null): array
+  {
+    $path = ! is_null($file) ? dirname($file) : getcwd();
+
+    $temporaryDirectory = '/tmp/codo_'.Str::random(10);
+
+    return [
+      '--volume',       "${path}:${temporaryDirectory}",
+      '--workdir',      $temporaryDirectory,
+    ];
   }
 }

@@ -78,7 +78,7 @@ return [
   */
 
   'remove' => [
-    // ..
+    NunoMaduro\Collision\Adapters\Laravel\Commands\TestCommand::class,
   ],
 
 ];
