@@ -16,9 +16,11 @@ case "$KERNEL" in
     ;;
 esac
 
-cat $SRC/$PHPVER/micro-$ARCH.sfx $APP/application > $APP/tmp-codo
+if [ "$(pgrep tmp-codo)" = "" >/dev/null 2>&1 ]; then
+  cat $SRC/$PHPVER/micro-$ARCH.sfx $APP/application > $APP/tmp-codo
 
-chmod +x $APP/tmp-codo
+  chmod +x $APP/tmp-codo
+fi
 
 $APP/tmp-codo "$@"
 
