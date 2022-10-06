@@ -36,6 +36,7 @@ class Configuration
       'CODO_UID'              => trim(shell_exec('id -u')),
       'CODO_GID'              => trim(shell_exec('id -g')),
       'CODO_BASEPATH'         => realpath($this->workdir),
+      'CODO_PROJECT'          => $this->getProject(),
       'CODO_DOMAIN'           => $this->getDomain(),
       'CODO_DOCKER'           => $this->getDocker(),
       'CODO_DOCKER_FULL'      => $this->getDocker(null, true),

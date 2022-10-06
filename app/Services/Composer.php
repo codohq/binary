@@ -10,6 +10,18 @@ class Composer implements Executable
   use InteractsWithProcesses;
 
   /**
+   * Instantiate a new service object.
+   *
+   * @param  boolean  $local  false
+   * @param  string|null  $workdir  null
+   * @return void
+   */
+  public function __construct(protected bool $local = false, protected ?string $workdir = null)
+  {
+    //
+  }
+
+  /**
    * Prepare the external program.
    *
    * @param  array  $arguments
@@ -17,7 +29,27 @@ class Composer implements Executable
    */
   public function prepare(array $arguments): array
   {
-    return array_merge(['composer'], $arguments);
+    if ($this->local) {
+      return array_merge(['composer'], $arguments);
+    }
+
+    if (is_dir($this->workdir)) {
+      $workdir = [
+        '-v', $this->workdir.PATH_SEPARATOR.'/tmp/volume',
+        '-w', '/tmp/volume',
+      ];
+    }
+
+    return (new DockerCompose)->prepare(array_merge([
+      'run',
+      '--user', implode(PATH_SEPARATOR, [getmyuid(), getmygid()]),
+      '--interactive',
+      '--tty',
+      '--use-aliases',
+      ...$workdir ?? [],
+      'php',
+      'composer',
+    ], $arguments));
   }
 
   /**

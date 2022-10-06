@@ -12,7 +12,7 @@ class ShellCommand extends Command
    *
    * @var string
    */
-  protected $signature = 'shell {container} {--s|--shell=/bin/sh}';
+  protected $signature = 'shell {container} {--s|--shell=/bin/bash}';
 
   /**
    * The description of the command.
@@ -36,17 +36,21 @@ class ShellCommand extends Command
 
     $shell = $this->option('shell');
 
-    // $exitCode = $this->call(Commands\External\DockerComposeCommand::class, [
-    //   'ps',
-    //   $container,
-    //   '--status', 'running',
-    //   '-q',
-    // ]);
+    $exitCode = $this->call(Commands\External\DockerComposeCommand::class, [
+      'ps',
+      $container,
+      '--status', 'running',
+      '-q',
+    ]);
+
+    if ($exitCode === 0) {
+      $command = ['exec', '-it'];
+    } else {
+      $command = ['run', '-it', '--rm'];
+    }
 
     return $this->call(Commands\External\DockerComposeCommand::class, [
-      'run',
-      '-it',
-      '--rm',
+      ...$command,
       $container,
       $shell,
     ]);

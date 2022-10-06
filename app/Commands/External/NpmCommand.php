@@ -15,7 +15,7 @@ class NpmCommand extends Command
    *
    * @var string
    */
-  protected $signature = 'npm {--w|workdir=} {--c|--container=node}';
+  protected $signature = 'npm {--l|--local} {--w|workdir=} {--c|--container=node}';
 
   /**
    * The description of the command.
@@ -37,9 +37,12 @@ class NpmCommand extends Command
 
     $codo = app('codo');
 
-    $process = (new Npm(local: false))->on(
-      $command = $this->buildCommand($codo['config'])
-    );
+    $command = $this->buildCommand($codo['config']);
+
+    $process = (new Npm(
+      local: $this->option('local'),
+      workdir: $command->workspace(),
+    ))->on($command);
 
     $process->run();
 
@@ -95,7 +98,7 @@ class NpmCommand extends Command
       public function workspace(): ?string
       {
         return $this->console->option('workdir') ?? (
-          $this->package ? dirname($this->package) : $this->codo->getTheme(null, true)
+          $this->package ? dirname($this->package) : getcwd()
         );
       }
 
