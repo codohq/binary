@@ -93,17 +93,17 @@ class AppServiceProvider extends ServiceProvider
   {
     $expected = sprintf('%s/codo.yml', $directory);
 
+    if (is_file($expected)) {
+      return $expected;
+    }
+
     $parent = dirname($directory);
 
     if (in_array($parent, ['/', '\\', '.'])) {
       return null;
     }
 
-    if (! is_file($expected)) {
-      return $this->locateCodoConfigurationFile($parent);
-    }
-
-    return $expected;
+    return $this->locateCodoConfigurationFile($parent);
   }
 
   /**
