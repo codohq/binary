@@ -127,7 +127,13 @@ class AppServiceProvider extends ServiceProvider
     }
 
     foreach ((new Finder)->in($paths)->files() as $command) {
+      $displayErrors = ini_get('display_errors');
+
+      ini_set('display_errors', true);
+
       include_once $command->getPathname();
+
+      ini_set('display_errors', $displayErrors);
 
       $command = str_replace(
         ['/', '.php'],
