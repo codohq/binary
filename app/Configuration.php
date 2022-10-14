@@ -100,13 +100,20 @@ class Configuration
    *
    * @param  string|null  $subpath  null
    * @param  boolean  $absolute  false
-   * @return string
+   * @param  boolean  $exists  false
+   * @return string|false
    */
-  public function getDocker(?string $subpath = null, bool $absolute = false): string
+  public function getDocker(?string $subpath = null, bool $absolute = false, bool $exists = false): string|false
   {
     $path = $this->get('codo.components.docker', './docker');
 
-    return $this->resolvePath($path, $subpath, $absolute);
+    $resolved = $this->resolvePath($path, $subpath, $absolute);
+
+    if ($exists and ! file_exists($resolved)) {
+      return false;
+    }
+
+    return $resolved;
   }
 
   /**

@@ -22,7 +22,7 @@ class DockerCompose implements Executable
 
     $files = Arr::collapse(array_map(fn ($x) => ['-f', $x], array_filter([
       $codo['config']->getDocker('docker-compose.yml', true),
-      $codo['config']->getDocker(sprintf('docker-compose.%s.yml', $codo['config']->getEnvironment()), true),
+      $codo['config']->getDocker(sprintf('docker-compose.%s.yml', $codo['config']->getEnvironment()), true, true),
     ])));
 
     $arguments = [
