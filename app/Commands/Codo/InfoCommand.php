@@ -6,7 +6,7 @@ use Illuminate\Support\Arr;
 use function Termwind\{ render };
 use Codohq\Binary\Commands\Command;
 use Codohq\Binary\Components\GroupedList;
-use Codohq\Binary\{ Commands, Configuration, Services };
+use Codohq\Binary\{ Commands, Configuration, Binaries };
 
 class InfoCommand extends Command
 {
@@ -61,8 +61,9 @@ class InfoCommand extends Command
   {
     $items = (new GroupedList)
       ->addGroup('Prerequisites', function ($group) {
-        $group->addItem('Docker', Services\Docker::version(), 'renderVersion');
-        $group->addItem('Docker Compose', Services\DockerCompose::version(), 'renderVersion');
+        $group->addItem('Docker', Binaries\Docker::version(), 'renderVersion');
+        $group->addItem('Docker Compose', Binaries\DockerCompose::version(), 'renderVersion');
+        $group->addItem('Mkcert (Optional)', Binaries\Mkcert::version(), 'renderVersion');
       });
 
     return $items->render();

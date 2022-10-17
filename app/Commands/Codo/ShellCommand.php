@@ -2,17 +2,17 @@
 
 namespace Codohq\Binary\Commands\Codo;
 
-use Codohq\Binary\Commands;
 use Codohq\Binary\Commands\Command;
+use Codohq\Binary\Contracts\Eligible;
 
-class ShellCommand extends Command
+class ShellCommand extends Command implements Eligible
 {
   /**
    * The signature of the command.
    *
    * @var string
    */
-  protected $signature = 'shell {container} {--s|--shell=/bin/bash}';
+  protected $signature = 'shell {container}';
 
   /**
    * The description of the command.
@@ -28,31 +28,10 @@ class ShellCommand extends Command
    */
   public function handle()
   {
-    if ($this->isIneligible()) {
-      return $this->ineligible();
-    }
-
     $container = $this->argument('container');
 
-    $shell = $this->option('shell');
+    $command = implode(' ', $this->leftovers()) ?: '/bin/bash';
 
-    $exitCode = $this->call(Commands\External\DockerComposeCommand::class, [
-      'ps',
-      $container,
-      '--status', 'running',
-      '-q',
-    ]);
-
-    if ($exitCode === 0) {
-      $command = ['exec', '-it'];
-    } else {
-      $command = ['run', '-it', '--rm'];
-    }
-
-    return $this->call(Commands\External\DockerComposeCommand::class, [
-      ...$command,
-      $container,
-      $shell,
-    ]);
+    return $this->binary->dockerCompose($container, "{$command}");
   }
 }

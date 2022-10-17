@@ -2,10 +2,11 @@
 
 namespace Codohq\Binary\Commands\Codo;
 
-use Codohq\Binary\Commands;
 use Codohq\Binary\Commands\Command;
+use Codohq\Binary\Commands\Services;
+use Codohq\Binary\Contracts\Eligible;
 
-class TestCommand extends Command
+class TestCommand extends Command implements Eligible
 {
   /**
    * The signature of the command.
@@ -28,17 +29,13 @@ class TestCommand extends Command
    */
   public function handle()
   {
-    if ($this->isIneligible()) {
-      return $this->ineligible();
-    }
-
     $binary = $this->option('bin');
 
     if (! file_exists($binary)) {
       return $this->error("Could not locate test binary at '${binary}'.");
     }
 
-    return $this->call(Commands\External\PhpCommand::class, [
+    return $this->call(Services\PhpCommand::class, [
       $binary,
     ]);
   }

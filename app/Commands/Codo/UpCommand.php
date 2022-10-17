@@ -2,10 +2,11 @@
 
 namespace Codohq\Binary\Commands\Codo;
 
-use Codohq\Binary\Commands;
 use Codohq\Binary\Commands\Command;
+use Codohq\Binary\Commands\Services;
+use Codohq\Binary\Contracts\Eligible;
 
-class UpCommand extends Command
+class UpCommand extends Command implements Eligible
 {
   /**
    * The signature of the command.
@@ -28,15 +29,10 @@ class UpCommand extends Command
    */
   public function handle()
   {
-    if ($this->isIneligible()) {
-      return $this->ineligible();
-    }
-
-    return $this->call(Commands\External\DockerComposeCommand::class, [
+    return $this->call(Services\DockerComposeCommand::class, [
       'up',
-      '--force-recreate',
       '--remove-orphans',
-      '--build',
+      '--force-recreate',
     ]);
   }
 }

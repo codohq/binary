@@ -2,10 +2,11 @@
 
 namespace Codohq\Binary\Commands\Codo;
 
-use Codohq\Binary\Commands;
 use Codohq\Binary\Commands\Command;
+use Codohq\Binary\Commands\Services;
+use Codohq\Binary\Contracts\Eligible;
 
-class DownCommand extends Command
+class DownCommand extends Command implements Eligible
 {
   /**
    * The signature of the command.
@@ -28,11 +29,7 @@ class DownCommand extends Command
    */
   public function handle()
   {
-    if ($this->isIneligible()) {
-      return $this->ineligible();
-    }
-
-    return $this->call(Commands\External\DockerComposeCommand::class, [
+    return $this->call(Services\DockerComposeCommand::class, [
       'down',
       '--remove-orphans',
     ]);
