@@ -39,4 +39,4 @@ jobs:
       uses: actions/upload-artifact@v3.1.0
       with:
         name: codo-linux-x86_64
-        path: ./builds
+        path: ./builds/codo-linux-x86_64
