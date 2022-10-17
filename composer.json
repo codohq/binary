@@ -45,6 +45,9 @@
       "pestphp/pest-plugin": true
     }
   },
+  "scripts": {
+    "build": "./bin/bundle.sh"
+  },
   "minimum-stability": "dev",
   "prefer-stable": true,
   "bin": ["codo"]

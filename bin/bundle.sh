@@ -18,11 +18,12 @@ esac
 
 rm -rf $APP/builds/
 
-docker run --rm -it \
-  -u $(id -u):$(id -g) \
-  -v $APP:/srv \
-  -e "COMPOSER_HOME=/tmp" \
-  composer:latest /srv/application app:build codo --build-version="v0.1.0-alpha1"
+# docker run --rm -it \
+#   -u $(id -u):$(id -g) \
+#   -v $APP:/srv \
+#   -e "COMPOSER_HOME=/tmp" \
+#   composer:latest /srv/application app:build codo --build-version="v0.1.0-alpha1"
+php $APP/application app:build codo --build-version="v0.1.0-alpha1"
 
 if [ ! -f "$SRC/$PHPVER/micro-$ARCH.sfx" ]; then
   echo "Could not find the phpmicro build <$SRC/$PHPVER/micro-$ARCH.sfx>"
