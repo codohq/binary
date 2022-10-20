@@ -3,6 +3,7 @@
 namespace Codohq\Binary;
 
 use Closure;
+use Codohq\Binary\Commands\Command;
 use Symfony\Component\Process\Process as SymfonyProcess;
 
 class Process
@@ -131,6 +132,10 @@ class Process
     $process->setTty(SymfonyProcess::isTtySupported());
     $process->setTimeout(null);
     $process->setIdleTimeout(null);
+
+    if (! Command::showOutput()) {
+      $process->disableOutput();
+    }
 
     return $process;
   }

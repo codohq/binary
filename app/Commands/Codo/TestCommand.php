@@ -37,6 +37,7 @@ class TestCommand extends Command implements Eligible
 
     return $this->call(Services\PhpCommand::class, [
       $binary,
+      ...$this->leftovers(),
     ]);
   }
 }

@@ -39,7 +39,7 @@ class DockerComposeCommand extends Command implements Eligible
     $process->run();
 
     if (! $process->isSuccessful()) {
-        throw new ProcessFailedException($process);
+      throw new ProcessFailedException($process);
     }
 
     return $process->getExitCode();

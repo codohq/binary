@@ -33,6 +33,7 @@ class UpCommand extends Command implements Eligible
       'up',
       '--remove-orphans',
       '--force-recreate',
+      ...$this->leftovers(),
     ]);
   }
 }

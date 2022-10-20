@@ -33,12 +33,21 @@ class SslCommand extends Command implements Eligible
       $domain = $this->codo['config']->getDomain(),
     ];
 
+    $domains = [...$domains, ...$this->codo['config']->getSslDomains()];
+
     if ($this->option('wildcard')) {
       $domains[] = "*.{$domain}";
     }
 
-    var_dump($domains); exit;
+    $certificate = $this->codo['config']->getDocker("certificates/{$domain}.pem");
+    $key = $this->codo['config']->getDocker("certificates/{$domain}-key.pem");
 
-    return $this->call(Services\MkcertCommand::class, $domains);
+    return $this->call(Services\MkcertCommand::class, [
+      '-cert-file',
+      $certificate,
+      '-key-file',
+      $key,
+      ...$domains,
+    ]);
   }
 }

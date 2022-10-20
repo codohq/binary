@@ -17,11 +17,18 @@ abstract class Command extends Base
   use Concerns\InteractsWithOutput;
 
   /**
-   * Holds the command executor instance.
+   * Holds the output status.
    *
-   * @var \Codohq\Binary\Intermediary;
+   * @var boolean
    */
-  public Intermediary $binary;
+  public static bool $showOutput = true;
+
+  /**
+   * Holds the CLI argv array.
+   *
+   * @var array|null
+   */
+  public static ?array $argv = null;
 
   /**
    * Holds the current Codo project configuration.
@@ -29,6 +36,13 @@ abstract class Command extends Base
    * @var array
    */
   public array $codo;
+
+  /**
+   * Holds the command executor instance.
+   *
+   * @var \Codohq\Binary\Intermediary;
+   */
+  public Intermediary $binary;
 
   /**
    * Holds all of the leftover arguments.
@@ -48,8 +62,23 @@ abstract class Command extends Base
 
     parent::__construct();
 
+    if (is_null(static::$argv)) {
+      static::enableArgv();
+    }
+
     $this->codo = resolve('codo');
     $this->binary = new Intermediary($this);
+  }
+
+  /**
+   * Define the command's schedule.
+   *
+   * @param  \Illuminate\Console\Scheduling\Schedule  $schedule
+   * @return void
+   */
+  public function schedule(Schedule $schedule)
+  {
+    // $schedule->command(static::class)->everyMinute();
   }
 
   /**
@@ -69,14 +98,43 @@ abstract class Command extends Base
   }
 
   /**
-   * Define the command's schedule.
+   * Call another console command.
    *
-   * @param  \Illuminate\Console\Scheduling\Schedule  $schedule
-   * @return void
+   * @param  \Symfony\Component\Console\Command\Command|string  $command
+   * @param  array  $arguments
+   * @return int
    */
-  public function schedule(Schedule $schedule)
+  public function call($command, array $arguments = [])
   {
-    // $schedule->command(static::class)->everyMinute();
+    static::enableOutput();
+    static::disableArgv();
+
+    $response = parent::call($command, $arguments);
+
+    static::enableArgv();
+    static::disableOutput();
+
+    return $response;
+  }
+
+  /**
+   * Call another console command without output.
+   *
+   * @param  \Symfony\Component\Console\Command\Command|string  $command
+   * @param  array  $arguments
+   * @return int
+   */
+  public function callSilent($command, array $arguments = [])
+  {
+    static::disableOutput();
+    static::disableArgv();
+
+    $response = parent::callSilent($command, $arguments);
+
+    static::enableArgv();
+    static::enableOutput();
+
+    return $response;
   }
 
   /**
@@ -150,7 +208,7 @@ abstract class Command extends Base
   {
     $definition = $this->getDefinition();
 
-    $tokens = invade(new ArgvInput)->tokens;
+    $tokens = invade(new ArgvInput(static::$argv))->tokens;
 
     if ($this->input instanceof ArrayInput) {
       $parameters = invade($this->input)->parameters;
@@ -205,7 +263,6 @@ abstract class Command extends Base
     $arguments = $this->input->getArguments();
 
     if (! ($this->input instanceof ArrayInput)) {
-      // unset($arguments['command']);
       foreach ($arguments as $argument) {
         array_splice($tokens, array_search($argument, $tokens), 1);
       }
@@ -234,5 +291,55 @@ abstract class Command extends Base
     }
 
     return $this->leftovers;
+  }
+
+  /**
+   * Disable the leftovers via argv.
+   *
+   * @return void
+   */
+  public static function disableArgv(): void
+  {
+    static::$argv = [];
+  }
+
+  /**
+   * Enable the leftovers via argv.
+   *
+   * @return void
+   */
+  public static function enableArgv(): void
+  {
+    static::$argv = $_SERVER['argv'];
+  }
+
+  /**
+   * Disable process output.
+   *
+   * @return void
+   */
+  public static function disableOutput(): void
+  {
+    static::$showOutput = false;
+  }
+
+  /**
+   * Enable process output.
+   *
+   * @return void
+   */
+  public static function enableOutput(): void
+  {
+    static::$showOutput = true;
+  }
+
+  /**
+   * Check if process output is enabled or not.
+   *
+   * @return boolean
+   */
+  public static function showOutput(): bool
+  {
+    return static::$showOutput;
   }
 }

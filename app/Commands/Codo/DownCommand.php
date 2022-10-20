@@ -32,6 +32,7 @@ class DownCommand extends Command implements Eligible
     return $this->call(Services\DockerComposeCommand::class, [
       'down',
       '--remove-orphans',
+      ...$this->leftovers(),
     ]);
   }
 }

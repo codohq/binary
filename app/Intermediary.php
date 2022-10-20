@@ -52,7 +52,27 @@ class Intermediary
     $process->run();
 
     if (! $process->isSuccessful()) {
-        throw new ProcessFailedException($process);
+      throw new ProcessFailedException($process);
+    }
+
+    return $process->getExitCode();
+  }
+
+  /**
+   * Run a Docker command.
+   *
+   * @param  string  $command
+   * @param  string|null  $workdir  null
+   * @return integer
+   */
+  public function docker(string $command, ?string $workdir = null): int
+  {
+    $process = (new Binaries\Docker($workdir))->raw($command);
+
+    $process->run();
+
+    if (! $process->isSuccessful()) {
+      throw new ProcessFailedException($process);
     }
 
     return $process->getExitCode();
@@ -117,5 +137,24 @@ class Intermediary
     }
 
     return $this->dockerCompose('node', "npm {$command}", $workdir);
+  }
+
+  /**
+   * Run a MariaDB query.
+   *
+   * @param  string  $query
+   * @return integer
+   */
+  public function mariadb(string $query): int
+  {
+    if (! $this->isContainerRunning('mariadb')) {
+      throw new CodoProjectIsDownException;
+    }
+
+    return $this->dockerCompose('mariadb', <<<COMMAND
+
+      /bin/bash -c "/usr/bin/mysql -uroot -p\${MYSQL_ROOT_PASSWORD} -s -N -e \"{$query}\""
+
+    COMMAND);
   }
 }

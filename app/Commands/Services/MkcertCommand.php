@@ -32,7 +32,7 @@ class MkcertCommand extends Command implements Eligible
   {
     $command = implode(' ', $this->leftovers());
 
-    $process = (new Binaries\Mkcert)->raw($command);
+    $process = (new Binaries\Mkcert)->raw("-install {$command}");
 
     $process->run();
 

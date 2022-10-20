@@ -75,6 +75,16 @@ class Configuration
   }
 
   /**
+   * Retrieve any additional domains for certificate generation.
+   *
+   * @return array
+   */
+  public function getSslDomains(): array
+  {
+    return $this->get('settings.extra_domains', new Collection)->toArray();
+  }
+
+  /**
    * Retrieve the project environment.
    *
    * @return string
