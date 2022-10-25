@@ -6,7 +6,7 @@ use Illuminate\Support\Arr;
 use function Termwind\{ render };
 use Codohq\Binary\Commands\Command;
 use Codohq\Binary\Components\GroupedList;
-use Codohq\Binary\{ Commands, Configuration, Binaries };
+use Codohq\Binary\{ Commands, Contracts, Binaries };
 
 class InfoCommand extends Command
 {
@@ -15,7 +15,10 @@ class InfoCommand extends Command
    *
    * @var string
    */
-  protected $signature = 'info {--e|--env-variables}';
+  protected $signature = '
+    info
+    {--e|--env-variables}
+  ';
 
   /**
    * The description of the command.
@@ -72,10 +75,10 @@ class InfoCommand extends Command
   /**
    * Render a list of the project configuration
    *
-   * @param  \Codohq\Binary\Configuration|null  $config
+   * @param  \Codohq\Binary\Contracts\Manifest|null  $config
    * @return string|null
    */
-  protected function projectConfiguration(?Configuration $config): ?string
+  protected function projectConfiguration(?Contracts\Manifest $config): ?string
   {
     if ($this->isIneligible()) {
       return $this->ineligible(render: false);
@@ -83,19 +86,17 @@ class InfoCommand extends Command
 
     $items = (new GroupedList)
       ->addGroup('Project', function ($group) use ($config) {
-        $group->addItem('Name', $config->getProject(), 'renderProject');
-        $group->addItem('Environment', $config->getEnvironment(), 'renderValue');
-        $group->addItem('Domain', $config->getDomain(), 'renderValue');
+        $group->addItem('Name', $config->name(), 'renderProject');
+        $group->addItem('Environment', $config->environment(), 'renderValue');
+        $group->addItem('Domain', $config->get('network.hostname'), 'renderValue');
 
         $group->addGroup('Paths', function ($group) use ($config) {
-          $group->addItem('Root', $config->getWorkingDirectory(), 'renderValue');
-          $group->addItem('Docker', $config->getDocker(), 'renderValue');
-          $group->addItem('Entrypoint', $config->getEntrypoint(), 'renderValue');
-          $group->addItem('Framework', $config->getFramework(), 'renderValue');
-          $group->addItem('Theme', $config->getTheme(), 'renderValue');
+          $group->addItem('Root', $config->root()->asAbsolute(), 'renderValue');
+          $group->addItem('Docker', $config->dockerPath()->asRelative(), 'renderValue');
+          $group->addItem('Entrypoint', $config->entrypoint()->asRelative(), 'renderValue');
 
           $group->addGroup('Commands', function ($group) use ($config) {
-            $group->addItems($config->getCommandDirectories(false), 'renderValue');
+            $group->addItems($config->get('commands')?->toArray(), 'renderValue');
           });
         });
       });
@@ -106,16 +107,16 @@ class InfoCommand extends Command
   /**
    * Render a list of the project's environment variables.
    *
-   * @param  \Codohq\Binary\Configuration|null  $config
+   * @param  \Codohq\Binary\Contracts\Manifest|null  $config
    * @return string|null
    */
-  protected function envVariables(?Configuration $config): ?string
+  protected function envVariables(?Contracts\Manifest $config): ?string
   {
     if ($this->isIneligible()) {
       return $this->ineligible(render: false);
     }
 
-    $envVariables = $config->getEnvironmentVariables();
+    $envVariables = $config->environmentVariables();
 
     $items = (new GroupedList)
       ->addGroup('', function ($group) use ($envVariables) {

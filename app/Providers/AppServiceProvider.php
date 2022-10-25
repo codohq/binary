@@ -3,10 +3,12 @@
 namespace Codohq\Binary\Providers;
 
 use Phar;
+use Error;
 use ReflectionClass;
+use RuntimeException;
 use Illuminate\Console\Command;
-use Codohq\Binary\Configuration;
 use Symfony\Component\Finder\Finder;
+use Codohq\Binary\Contracts\Manifest;
 use Illuminate\Contracts\Console\Kernel;
 use Codohq\Binary\Parsers\YamlConfigParser;
 use Illuminate\Console\Application as Artisan;
@@ -31,8 +33,15 @@ class AppServiceProvider extends ServiceProvider
    */
   public function register()
   {
-    $this->registerHelpers();
-    $this->initialiseCodo();
+    try {
+
+      $this->registerHelpers();
+
+      $this->initialiseCodo();
+
+    } catch (Error $e) {
+      throw new \Exception(null, null, $e);
+    }
   }
 
   /**
@@ -69,7 +78,7 @@ class AppServiceProvider extends ServiceProvider
     $config = is_file($filepath) ? (new YamlConfigParser)->parse($filepath) : null;
 
     if (! is_null($config)) {
-      config(['logging.channels.single.path' => $config->getWorkingDirectory('codo.log')]);
+      config(['logging.channels.single.path' => $config->root()->asAbsolute('codo.log')]);
 
       $this->mapCommandPaths($config);
     }
@@ -109,12 +118,12 @@ class AppServiceProvider extends ServiceProvider
   /**
    * Map additional command paths.
    *
-   * @param  \Codohq\Binary\Configuration  $config
+   * @param  \Codohq\Binary\Contracts\Manifest  $config
    * @return void
    */
-  protected function mapCommandPaths(Configuration $config): void
+  protected function mapCommandPaths(Manifest $config): void
   {
-    $paths = $config->getCommandDirectories();
+    $paths = $config->get('command');
 
     $paths = array_unique(Arr::wrap($paths));
 

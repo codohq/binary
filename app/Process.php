@@ -93,7 +93,7 @@ class Process
   protected function getEnvVariables(): array
   {
     return array_merge(
-      $this->codo['config']->getEnvironmentVariables(),
+      $this->codo['config']->environmentVariables(),
       $this->envVariables,
     );
   }

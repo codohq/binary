@@ -2,8 +2,10 @@
 
 namespace Codohq\Binary\Parsers;
 
-use Codohq\Binary\Configuration;
-use Codohq\Binary\Contracts\ConfigParser;
+use Throwable;
+use RuntimeException;
+use Codohq\Binary\Manifests;
+use Codohq\Binary\Contracts\{ ConfigParser, Manifest };
 
 class YamlConfigParser implements ConfigParser
 {
@@ -11,15 +13,23 @@ class YamlConfigParser implements ConfigParser
    * Parse the given configuration file.
    *
    * @param  string  $filepath
-   * @return \Codohq\Binary\Configuration
+   * @return \Codohq\Binary\Contracts\Manifest
    */
-  public function parse(string $filepath): Configuration
+  public function parse(string $filepath): Manifest
   {
     $yaml = yaml_parse_file($filepath, 0, $ndocs, [
       '!codo' => [$this, 'handleCodoTags'],
     ]);
 
-    return new Configuration($yaml, dirname($filepath));
+    $manifest = (float) $yaml['version'];
+
+    switch ($manifest) {
+      case 1:
+        return Manifests\Version_1::validate($yaml, dirname($filepath));
+
+      default:
+        throw new RuntimeException('Invalid manifest version (valid options are "1").');
+    }
   }
 
   /**

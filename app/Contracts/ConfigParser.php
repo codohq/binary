@@ -2,15 +2,13 @@
 
 namespace Codohq\Binary\Contracts;
 
-use Codohq\Binary\Configuration;
-
 interface ConfigParser
 {
   /**
    * Parse the given configuration file.
    *
    * @param  string  $filepath
-   * @return \Codohq\Binary\Configuration
+   * @return \Codohq\Binary\Contracts\Manifest
    */
-  public function parse(string $filepath): Configuration;
+  public function parse(string $filepath): Manifest;
 }

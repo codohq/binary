@@ -29,18 +29,38 @@ class SslCommand extends Command implements Eligible
    */
   public function handle()
   {
+    var_dump('SSL generation!'); exit;
+
     $domains = [
       $domain = $this->codo['config']->getDomain(),
+      ...$this->codo['config']->getSubdomains(),
     ];
-
-    $domains = [...$domains, ...$this->codo['config']->getSslDomains()];
 
     if ($this->option('wildcard')) {
       $domains[] = "*.{$domain}";
     }
 
-    $certificate = $this->codo['config']->getDocker("certificates/{$domain}.pem");
-    $key = $this->codo['config']->getDocker("certificates/{$domain}-key.pem");
+    $main = $this->createCertificate($domain, $domains);
+
+    foreach ($this->codo['config']->getExtraCertificates() as $extraName => $extraDomains) {
+      $this->createCertificate($extraName, $extraDomains);
+    }
+
+    return $main;
+  }
+
+  /**
+   * Generate a certificate.
+   *
+   * @param  string  $name
+   * @param  array  $domains
+   * @return integer
+   */
+  protected function createCertificate(string $name, array $domains): int
+  {
+    $certificate = $this->codo['config']->getDocker("certificates/{$name}.pem");
+
+    $key = $this->codo['config']->getDocker("certificates/{$name}-key.pem");
 
     return $this->call(Services\MkcertCommand::class, [
       '-cert-file',

@@ -57,7 +57,7 @@ class Mkcert
    */
   protected function createProcess(string $command): Process
   {
-    $root = $this->codo['config']->getWorkingDirectory();
+    $root = $this->codo['config']->root()->asAbsolute();
 
     $process = Process::fromString(<<<COMMAND
 

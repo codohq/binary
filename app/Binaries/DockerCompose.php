@@ -54,9 +54,9 @@ class DockerCompose
 
     return (new Collection($files))
       ->map(function ($file) {
-        $file = str_ireplace('{env}', $this->codo['config']->getEnvironment(), $file);
+        $file = str_ireplace('{env}', $this->codo['config']->environment(), $file);
 
-        $path = $this->codo['config']->getDocker($file, true, true);
+        $path = $this->codo['config']->dockerPath()->asAbsolute($file);
 
         return $path;
       })
@@ -74,13 +74,12 @@ class DockerCompose
    */
   public function run(string $container, string $command): SymfonyProcess
   {
-    $workdir = $this->workdir ?: getcwd();
-    $workdir = implode(' ', [
+    $workdir = $this->workdir ? implode(' ', [
       '--volume',
-      "{$workdir}:/entrypoint",
+      "{$this->workdir}:/entrypoint",
       '--workdir',
       '/entrypoint',
-    ]);
+    ]) : '';
 
     $process = $this->createProcess(<<<COMMAND
 
@@ -179,11 +178,11 @@ class DockerCompose
   {
     $compose = $this->composeFiles()->join(' ');
 
-    $project = $this->codo['config']->getProject();
+    $project = $this->codo['config']->name();
 
-    $root = $this->codo['config']->getWorkingDirectory();
+    $root = $this->codo['config']->root()->asAbsolute();
 
-    $envFile = $this->codo['config']->getEntrypoint('.env', true);
+    $envFile = $this->codo['config']->entrypoint()->asAbsolute('.env');
 
     $process = Process::fromString(<<<COMMAND
 

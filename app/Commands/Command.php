@@ -164,7 +164,7 @@ abstract class Command extends Base
    */
   public function recursiveFileSearch(string $file): ?string
   {
-    $workingDirectory = $this->codo['config']->getWorkingDirectory();
+    $workingDirectory = $this->codo['config']->root()->asAbsolute();
 
     $filename = basename($file);
     $directory = dirname($file);
@@ -212,7 +212,12 @@ abstract class Command extends Base
 
     if ($this->input instanceof ArrayInput) {
       $parameters = invade($this->input)->parameters;
-      unset($parameters['command']);
+
+      if (isset($parameters['command']) and class_exists($parameters['command'])) {
+        unset($parameters['command']);
+      } else if (isset($parameters[0]) and $parameters[0] === $this->input->getFirstArgument()) {
+        unset($parameters[0]);
+      }
 
       unset($tokens[0]);
 

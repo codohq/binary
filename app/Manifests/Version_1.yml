@@ -1,0 +1,82 @@
+root:
+  _type: array
+  _children:
+
+    version:
+      _type: text
+      _required: true
+
+
+
+    codo:
+      _type: array
+      _required: true
+      _children:
+
+        name:
+          _type: text
+          _required: true
+
+        environment:
+          _type: text
+          _required: true
+
+        docker:
+          _type: text
+          _required: true
+
+
+
+    environments:
+      _type: prototype
+      _required: true
+      _prototype:
+        _type: array
+        _children:
+
+          name:
+            _type: text
+            _required: true
+
+          environment:
+            _type: prototype
+            _prototype:
+              _type: prototype
+              _prototype:
+                _type: text
+
+          entrypoint:
+            _type: text
+            _required: true
+
+          commands:
+            _type: prototype
+            min_items: 1
+            _prototype:
+              _type: text
+
+          network:
+            _type: array
+            _children:
+
+              hostname:
+                _type: text
+
+              certificates:
+                _type: prototype
+                _prototype:
+                  _type: array
+                  _children:
+
+                    name:
+                      _type: text
+                      _required: true
+
+                    hosts:
+                      _type: prototype
+                      _prototype:
+                        _type: text
+
+                    primary:
+                      _type: boolean
+
