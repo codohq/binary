@@ -5,6 +5,7 @@ namespace Codohq\Binary\Parsers;
 use Throwable;
 use RuntimeException;
 use Codohq\Binary\Manifests;
+use Codohq\Binary\Transformers\Variables;
 use Codohq\Binary\Contracts\{ ConfigParser, Manifest };
 
 class YamlConfigParser implements ConfigParser
@@ -19,6 +20,7 @@ class YamlConfigParser implements ConfigParser
   {
     $yaml = yaml_parse_file($filepath, 0, $ndocs, [
       '!codo' => [$this, 'handleCodoTags'],
+      '!cert' => [$this, 'handleCertificateTags'],
     ]);
 
     $manifest = (float) $yaml['version'];
@@ -46,5 +48,23 @@ class YamlConfigParser implements ConfigParser
       'version' => config('app.version'),
       default   => null,
     };
+  }
+
+  /**
+   * Handle `!cert` tags in the configuration yaml file.
+   *
+   * @param  mixed  $value
+   * @param  string  $tag
+   * @param  integer  $flags
+   * @return string
+   */
+  protected function handleCertificateTags(mixed $value, string $tag, int $flags): string
+  {
+    $public = 'A';//$value['public'];
+    $private = 'A';//$value['private'];
+
+    return serialize(
+      new Variables\CertificateVariable($public, $private)
+    );
   }
 }

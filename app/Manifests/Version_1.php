@@ -3,11 +3,11 @@
 namespace Codohq\Binary\Manifests;
 
 use Codohq\Binary\PathObject;
-use Codohq\Binary\Contracts\Manifest;
 use Illuminate\Support\{ Collection, Str };
 use Illuminate\Contracts\Support\Arrayable;
 use Codohq\Binary\Exceptions\InvalidDockerComposePath;
 use RomaricDrigon\MetaYaml\{ MetaYaml, Loader\YamlLoader };
+use Codohq\Binary\Contracts\{ Manifest, VariableTransformer };
 
 class Version_1 implements Manifest
 {
@@ -108,12 +108,10 @@ class Version_1 implements Manifest
   {
     $variables = $this->get('environment', new Collection)
       ->mapWithKeys(function ($value, $name) {
-        if (str_starts_with(strtoupper($name), 'CODO_CERTIFICATE_')) {
-          if (is_array($value)) {
-            $value = join(' ', $value);
-          } else if ($value instanceof Arrayable) {
-            $value = $value->join(' ');
-          }
+        $unserialized = @unserialize($value);
+
+        if ($unserialized !== false and $unserialized instanceof VariableTransformer) {
+          return [...$unserialized->handle($name)];
         }
 
         return [$name => $value];

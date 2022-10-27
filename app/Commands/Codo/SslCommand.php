@@ -29,24 +29,19 @@ class SslCommand extends Command implements Eligible
    */
   public function handle()
   {
-    var_dump('SSL generation!'); exit;
+    $certificates = $this->codo['config']->get('network.certificates');
 
-    $domains = [
-      $domain = $this->codo['config']->getDomain(),
-      ...$this->codo['config']->getSubdomains(),
-    ];
+    if (! $certificates?->isNotEmpty()) {
+      $this->comment('No certificates were configured to be generated.');
 
-    if ($this->option('wildcard')) {
-      $domains[] = "*.{$domain}";
+      return 0;
     }
 
-    $main = $this->createCertificate($domain, $domains);
-
-    foreach ($this->codo['config']->getExtraCertificates() as $extraName => $extraDomains) {
-      $this->createCertificate($extraName, $extraDomains);
+    foreach ($certificates->toArray() as $certificate) {
+      $this->createCertificate($certificate['name'], $certificate['hosts']);
     }
 
-    return $main;
+    return 0;
   }
 
   /**
@@ -58,9 +53,9 @@ class SslCommand extends Command implements Eligible
    */
   protected function createCertificate(string $name, array $domains): int
   {
-    $certificate = $this->codo['config']->getDocker("certificates/{$name}.pem");
+    $certificate = $this->codo['config']->dockerPath()->asRelative("certificates/{$name}.pem");
 
-    $key = $this->codo['config']->getDocker("certificates/{$name}-key.pem");
+    $key = $this->codo['config']->dockerPath()->asRelative("certificates/{$name}-key.pem");
 
     return $this->call(Services\MkcertCommand::class, [
       '-cert-file',

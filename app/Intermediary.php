@@ -3,11 +3,14 @@
 namespace Codohq\Binary;
 
 use LaravelZero\Framework\Commands\Command;
+use Codohq\Binary\Concerns\InteractsWithEligibility;
 use Codohq\Binary\Exceptions\CodoProjectIsDownException;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 
 class Intermediary
 {
+  use InteractsWithEligibility;
+
   /**
    * Holds the current Codo configuration.
    *
@@ -34,7 +37,11 @@ class Intermediary
    */
   public function isContainerRunning(string $container): bool
   {
-    return (new Binaries\DockerCompose)->isRunning($container);
+    $status = $this->isEligible() or (new Binaries\DockerCompose)->isRunning($container);
+
+    $this->ineligible();
+
+    return $status;
   }
 
   /**

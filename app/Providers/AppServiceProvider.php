@@ -123,19 +123,16 @@ class AppServiceProvider extends ServiceProvider
    */
   protected function mapCommandPaths(Manifest $config): void
   {
-    $paths = $config->get('command');
+    $paths = $config->get('commands')
+      ?->map(fn ($path) => realpath($config->root()->asAbsolute($path)))
+      ->filter()
+      ->unique();
 
-    $paths = array_unique(Arr::wrap($paths));
-
-    $paths = array_filter($paths, function ($path) {
-      return is_dir($path);
-    });
-
-    if (empty($paths)) {
+    if (! $paths?->isNotEmpty()) {
       return;
     }
 
-    foreach ((new Finder)->in($paths)->files() as $command) {
+    foreach ((new Finder)->in($paths->toArray())->files() as $command) {
       $displayErrors = ini_get('display_errors');
 
       ini_set('display_errors', true);

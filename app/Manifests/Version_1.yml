@@ -41,9 +41,10 @@ root:
           environment:
             _type: prototype
             _prototype:
-              _type: prototype
-              _prototype:
-                _type: text
+              _type: choice
+              _choices:
+                1:
+                  _type: text
 
           entrypoint:
             _type: text
@@ -76,7 +77,3 @@ root:
                       _type: prototype
                       _prototype:
                         _type: text
-
-                    primary:
-                      _type: boolean
-
