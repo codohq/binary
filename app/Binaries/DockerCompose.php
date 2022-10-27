@@ -60,7 +60,7 @@ class DockerCompose
 
         return $path;
       })
-      ->filter()
+      ->filter(fn ($x) => file_exists($x))
       ->map(fn ($x) => ['-f', $x])
       ->collapse();
   }
