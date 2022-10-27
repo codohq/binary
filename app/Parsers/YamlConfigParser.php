@@ -60,11 +60,8 @@ class YamlConfigParser implements ConfigParser
    */
   protected function handleCertificateTags(mixed $value, string $tag, int $flags): string
   {
-    $public = 'A';//$value['public'];
-    $private = 'A';//$value['private'];
-
     return serialize(
-      new Variables\CertificateVariable($public, $private)
+      new Variables\CertificateVariable($value['public'], $value['private'])
     );
   }
 }
