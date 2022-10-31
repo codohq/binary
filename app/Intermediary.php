@@ -37,7 +37,7 @@ class Intermediary
    */
   public function isContainerRunning(string $container): bool
   {
-    $status = $this->isEligible() or (new Binaries\DockerCompose)->isRunning($container);
+    $status = ($this->isEligible() or (new Binaries\DockerCompose)->isRunning($container));
 
     $this->ineligible();
 
