@@ -106,7 +106,19 @@ class Version_1 implements Manifest
    */
   public function environmentVariables(): array
   {
-    $variables = $this->get('environment', new Collection)
+    $globalVariables = $this->data->path('codo.variables', new Collection)
+      ->mapWithKeys(function ($value, $name) {
+        $unserialized = @unserialize($value);
+
+        if ($unserialized !== false and $unserialized instanceof VariableTransformer) {
+          return [...$unserialized->handle($name)];
+        }
+
+        return [$name => $value];
+      })
+      ->toArray();
+
+    $variables = $this->get('variables', new Collection)
       ->mapWithKeys(function ($value, $name) {
         $unserialized = @unserialize($value);
 
@@ -119,7 +131,9 @@ class Version_1 implements Manifest
       ->toArray();
 
     return array_merge(
-      $this->defaultEnvironmentVariables(), $variables ?: []
+      $this->defaultEnvironmentVariables(),
+      $variables ?: [],
+      $globalVariables ?: [],
     );
   }
 

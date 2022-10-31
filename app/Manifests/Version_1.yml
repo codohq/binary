@@ -25,6 +25,14 @@ root:
           _type: text
           _required: true
 
+        variables:
+          _type: prototype
+          _prototype:
+            _type: choice
+            _choices:
+              1:
+                _type: text
+
 
 
     environments:
@@ -38,7 +46,7 @@ root:
             _type: text
             _required: true
 
-          environment:
+          variables:
             _type: prototype
             _prototype:
               _type: choice
