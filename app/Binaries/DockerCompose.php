@@ -52,6 +52,8 @@ class DockerCompose
   {
     $files = ['docker-compose.yml', 'docker-compose.{env}.yml'];
 
+    $extraFiles = $this->codo['config']->get('extra_compose_files', []);
+
     return (new Collection($files))
       ->map(function ($file) {
         $file = str_ireplace('{env}', $this->codo['config']->environment(), $file);
@@ -60,6 +62,7 @@ class DockerCompose
 
         return $path;
       })
+      ->merge($extraFiles)
       ->filter(fn ($x) => file_exists($x))
       ->map(fn ($x) => ['-f', $x])
       ->collapse();
