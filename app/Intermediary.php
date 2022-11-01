@@ -160,7 +160,7 @@ class Intermediary
 
     return $this->dockerCompose('mariadb', <<<COMMAND
 
-      /bin/bash -c "/usr/bin/mysql -u\${DB_USERNAME} -p\${DB_PASSWORD} -s -N -e \"{$query}\""
+      /bin/bash -c "/usr/bin/mysql -uroot -p\${MARIADB_ROOT_PASSWORD} -s -N -e \"{$query}\""
 
     COMMAND);
   }
