@@ -6,7 +6,7 @@ sudo mkdir -p /opt/codohq
 sudo chgrp -R docker /opt/codohq
 sudo chmod -R g+rwx /opt/codohq
 
-git clone git@github.com:codohq/binary.git /opt/codohq/binary
+git clone https://github.com/codohq/binary.git /opt/codohq/binary
 
 docker run --rm --interactive --tty --volume /opt/codohq/binary:/app composer install
 
